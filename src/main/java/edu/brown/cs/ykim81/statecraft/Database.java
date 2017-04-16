@@ -26,64 +26,92 @@ public abstract class Database {
 
   public abstract void load();
 
-  public void initialize() {
-    connection = getSqlConnection();
-    try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM " + table  + " LIMIT 1;")) {
-      try (ResultSet rs = ps.executeQuery()) {
+  public abstract void initialize();
 
-      }
-    } catch (SQLException e) {
-      plugin.getLogger().log(Level.SEVERE, "Unable to retreive connection", e);
-    }
-  }
-
-  // These are the methods you can use to get things out of your database. You of course can make new ones to return different things in the database.
-  // This returns the number of people the player killed.
-  public Integer getTokens(String string) {
+  public boolean nameOfStateExists(String string) {
     try (Connection conn = getSqlConnection()) {
-      try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM " + table + " WHERE player = '"+string+"';")) {
+      try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM state WHERE name=? LIMIT 1;")) {
+        ps.setString(1, string);
         try (ResultSet rs = ps.executeQuery()) {
-          while(rs.next()){
-            if(rs.getString("player").equalsIgnoreCase(string.toLowerCase())){
-              return rs.getInt("kills");
-            }
+          if (rs.next()) {
+            return true;
+          } else {
+            return false;
           }
         }
       }
     } catch (SQLException e) {
       plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+      return false;
     }
-    return 0;
   }
 
-  public Integer getTotal(String string) {
+  public void addNewState(String name) {
     try (Connection conn = getSqlConnection()) {
-      try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM " + table + " WHERE player = '"+string+"';")) {
-        try (ResultSet rs = ps.executeQuery()) {
-          while(rs.next()){
-            if(rs.getString("player").equalsIgnoreCase(string.toLowerCase())){
-              return rs.getInt("total");
-            }
-          }
-        }
-      }
-    } catch (SQLException e) {
-      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
-    }
-    return 0;
-  }
-
-  public void setTokens(Player player, Integer tokens, Integer total) {
-    try (Connection conn = getSqlConnection()) {
-      try (PreparedStatement ps = conn.prepareStatement("REPLACE INTO " + table + " (player,kills,total) VALUES(?,?,?)")) {
-        ps.setString(1, player.getName().toLowerCase());
-        ps.setInt(2, tokens);
-        ps.setInt(3, total);
+      try (PreparedStatement ps = conn.prepareStatement("INSERT INTO state(name, money) VALUES(?,0)")) {
+        ps.setString(1, name);
         ps.executeUpdate();
         return;
       }
     } catch (SQLException e) {
       plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+    }
+  }
+
+  public int getStateIdFromName(String name) {
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("SELECT id FROM state WHERE name=?;")) {
+        ps.setString(1, name);
+        try (ResultSet rs = ps.executeQuery()) {
+          rs.next();
+          return rs.getInt("id");
+        }
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+      return -1;
+    }
+  }
+
+  public void addPlayerToState(String id, String state, boolean leader) {
+    int stateId = getStateIdFromName(state);
+    int leaderInt = 0;
+    if (leader) {
+      leaderInt = 1;
+    }
+
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO player(id, state, leader) VALUES(?,?,?)")) {
+        ps.setString(1, id);
+        ps.setInt(2, stateId);
+        ps.setInt(3, leaderInt);
+        ps.executeUpdate();
+        return;
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+    }
+  }
+
+  public boolean playerIsLeader(String id) {
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("SELECT leader FROM player WHERE id=? LIMIT 1;")) {
+        ps.setString(1, id);
+        try (ResultSet rs = ps.executeQuery()) {
+          if (rs.next()) {
+            if (rs.getInt("leader") == 1) {
+              return true;
+            } else {
+              return false;
+            }
+          } else {
+            return false;
+          }
+        }
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+      return false;
     }
   }
 

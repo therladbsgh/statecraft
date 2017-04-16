@@ -45,11 +45,13 @@
       <file leaf-file-name="Main.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/Main.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="684">
-              <caret line="19" column="33" lean-forward="true" selection-start-line="19" selection-start-column="33" selection-end-line="19" selection-end-column="33" />
+            <state relative-caret-position="792">
+              <caret line="24" column="30" lean-forward="true" selection-start-line="24" selection-start-column="30" selection-end-line="24" selection-end-column="30" />
               <folding>
-                <element signature="e#808#809#0" expanded="true" />
-                <element signature="e#838#839#0" expanded="true" />
+                <element signature="e#956#957#0" expanded="true" />
+                <element signature="e#986#987#0" expanded="true" />
+                <element signature="e#1027#1028#0" expanded="true" />
+                <element signature="e#1058#1059#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -58,8 +60,8 @@
       <file leaf-file-name="CommandCreate.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/CommandCreate.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="288">
-              <caret line="8" column="33" lean-forward="true" selection-start-line="8" selection-start-column="33" selection-end-line="8" selection-end-column="33" />
+            <state relative-caret-position="742">
+              <caret line="42" column="40" lean-forward="true" selection-start-line="42" selection-start-column="40" selection-end-line="42" selection-end-column="40" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -70,11 +72,30 @@
       <file leaf-file-name="StateDatabase.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/StateDatabase.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="828">
-              <caret line="29" column="0" lean-forward="true" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+            <state relative-caret-position="-72">
+              <caret line="4" column="18" lean-forward="true" selection-start-line="4" selection-start-column="18" selection-end-line="4" selection-end-column="18" />
               <folding>
-                <element signature="imports" expanded="true" />
-                <marker date="1492315198101" expanded="true" signature="526:1027" ph="CREATE TABLE... IF" />
+                <marker date="1492318273582" expanded="true" signature="464:490" ph="CREATE TABLE... IF" />
+                <marker date="1492318273582" expanded="true" signature="464:672" ph="CREATE TABLE... IF" />
+                <marker date="1492318273582" expanded="true" signature="1986:1999" ph="SELECT * FRO... " />
+                <marker date="1492318273582" expanded="true" signature="1986:2000" ph="SELECT * FRO... missingValue" />
+                <marker date="1492318273582" expanded="true" signature="1986:2025" ph="SELECT * FRO... missingValue" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PlayerDatabase.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/PlayerDatabase.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="562">
+              <caret line="21" column="36" lean-forward="true" selection-start-line="21" selection-start-column="36" selection-end-line="21" selection-end-column="36" />
+              <folding>
+                <marker date="1492320046041" expanded="true" signature="467:659" ph="CREATE TABLE... IF" />
+                <marker date="1492320046041" expanded="true" signature="467:688" ph="CREATE TABLE... IF" />
+                <marker date="1492320046041" expanded="true" signature="467:738" ph="CREATE TABLE... IF" />
+                <marker date="1492320046041" expanded="true" signature="467:754" ph="CREATE TABLE... IF" />
+                <marker date="1492320046041" expanded="true" signature="2068:2107" ph="SELECT * FRO... missingValue" />
               </folding>
             </state>
           </provider>
@@ -83,15 +104,15 @@
       <file leaf-file-name="Database.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/Database.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="814">
-              <caret line="30" column="86" lean-forward="true" selection-start-line="30" selection-start-column="86" selection-end-line="30" selection-end-column="87" />
+            <state relative-caret-position="454">
+              <caret line="96" column="48" lean-forward="true" selection-start-line="96" selection-start-column="48" selection-end-line="96" selection-end-column="48" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <marker date="1492316264041" expanded="true" signature="733:746" ph="SELECT * FRO... missingValue" />
-                <marker date="1492316264041" expanded="true" signature="733:769" ph="SELECT * FRO... missingValueORDER" />
-                <marker date="1492316264041" expanded="true" signature="733:773" ph="SELECT * FRO... missingValueORDER" />
-                <marker date="1492316264041" expanded="true" signature="1313:1368" ph="SELECT * FRO... missingValue" />
-                <marker date="1492316264041" expanded="true" signature="1899:1954" ph="SELECT * FRO... missingValue" />
+                <marker date="1492321372638" expanded="true" signature="802:842" ph="SELECT * FRO... missingValue" />
+                <marker date="1492321372638" expanded="true" signature="1345:1387" ph="INSERT INTO state... " />
+                <marker date="1492321372638" expanded="true" signature="1749:1776" ph="SELECT id FR... missingValue" />
+                <marker date="1492321372638" expanded="true" signature="1749:1782" ph="SELECT id FR... state" />
+                <marker date="1492321372638" expanded="true" signature="2857:2901" ph="SELECT leade... player" />
               </folding>
             </state>
           </provider>
@@ -106,6 +127,11 @@
       </list>
     </option>
   </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>db</find>
+    </findStrings>
+  </component>
   <component name="GradleLocalSettings">
     <option name="externalProjectsViewState">
       <projects_view />
@@ -116,12 +142,14 @@
       <list>
         <option value="$PROJECT_DIR$/src/plugin.yml" />
         <option value="$PROJECT_DIR$/src/main/resources/plugin.yml" />
-        <option value="$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/CommandCreate.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/Error.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/Errors.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/Sqlite.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/StateDatabase.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/Main.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/PlayerDatabase.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/PlayerData.java" />
+        <option value="$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/CommandCreate.java" />
         <option value="$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/Database.java" />
       </list>
     </option>
@@ -293,6 +321,9 @@
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\therl\Documents\A_Quasiproductive_Space\Brown\StateCraft\src\main\resources" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="edu.brown.cs.ykim81.statecraft" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\therl\Documents\A_Quasiproductive_Space\Brown\StateCraft\lib" />
@@ -683,12 +714,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1492310608418</updated>
-      <workItem from="1492310610585" duration="6693000" />
+      <workItem from="1492310610585" duration="10831000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="6693000" />
+    <option name="totallyTimeSpent" value="10831000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-13" y="-13" width="3226" height="1766" extended-state="6" />
@@ -780,49 +811,76 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/CommandCreate.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="288">
-          <caret line="8" column="33" lean-forward="true" selection-start-line="8" selection-start-column="33" selection-end-line="8" selection-end-column="33" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/Main.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="684">
-          <caret line="19" column="33" lean-forward="true" selection-start-line="19" selection-start-column="33" selection-end-line="19" selection-end-column="33" />
+        <state relative-caret-position="792">
+          <caret line="24" column="30" lean-forward="true" selection-start-line="24" selection-start-column="30" selection-end-line="24" selection-end-column="30" />
           <folding>
-            <element signature="e#808#809#0" expanded="true" />
-            <element signature="e#838#839#0" expanded="true" />
+            <element signature="e#956#957#0" expanded="true" />
+            <element signature="e#986#987#0" expanded="true" />
+            <element signature="e#1027#1028#0" expanded="true" />
+            <element signature="e#1058#1059#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/StateDatabase.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="828">
-          <caret line="29" column="0" lean-forward="true" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+        <state relative-caret-position="-72">
+          <caret line="4" column="18" lean-forward="true" selection-start-line="4" selection-start-column="18" selection-end-line="4" selection-end-column="18" />
+          <folding>
+            <marker date="1492318273582" expanded="true" signature="464:490" ph="CREATE TABLE... IF" />
+            <marker date="1492318273582" expanded="true" signature="464:672" ph="CREATE TABLE... IF" />
+            <marker date="1492318273582" expanded="true" signature="1986:1999" ph="SELECT * FRO... " />
+            <marker date="1492318273582" expanded="true" signature="1986:2000" ph="SELECT * FRO... missingValue" />
+            <marker date="1492318273582" expanded="true" signature="1986:2025" ph="SELECT * FRO... missingValue" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/PlayerData.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="324">
+          <caret line="9" column="0" lean-forward="true" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/CommandCreate.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="742">
+          <caret line="42" column="40" lean-forward="true" selection-start-line="42" selection-start-column="40" selection-end-line="42" selection-end-column="40" />
           <folding>
             <element signature="imports" expanded="true" />
-            <marker date="1492315198101" expanded="true" signature="526:1027" ph="CREATE TABLE... IF" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/PlayerDatabase.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="562">
+          <caret line="21" column="36" lean-forward="true" selection-start-line="21" selection-start-column="36" selection-end-line="21" selection-end-column="36" />
+          <folding>
+            <marker date="1492320046041" expanded="true" signature="467:659" ph="CREATE TABLE... IF" />
+            <marker date="1492320046041" expanded="true" signature="467:688" ph="CREATE TABLE... IF" />
+            <marker date="1492320046041" expanded="true" signature="467:738" ph="CREATE TABLE... IF" />
+            <marker date="1492320046041" expanded="true" signature="467:754" ph="CREATE TABLE... IF" />
+            <marker date="1492320046041" expanded="true" signature="2068:2107" ph="SELECT * FRO... missingValue" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/edu/brown/cs/ykim81/statecraft/Database.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="814">
-          <caret line="30" column="86" lean-forward="true" selection-start-line="30" selection-start-column="86" selection-end-line="30" selection-end-column="87" />
+        <state relative-caret-position="454">
+          <caret line="96" column="48" lean-forward="true" selection-start-line="96" selection-start-column="48" selection-end-line="96" selection-end-column="48" />
           <folding>
             <element signature="imports" expanded="true" />
-            <marker date="1492316264041" expanded="true" signature="733:746" ph="SELECT * FRO... missingValue" />
-            <marker date="1492316264041" expanded="true" signature="733:769" ph="SELECT * FRO... missingValueORDER" />
-            <marker date="1492316264041" expanded="true" signature="733:773" ph="SELECT * FRO... missingValueORDER" />
-            <marker date="1492316264041" expanded="true" signature="1313:1368" ph="SELECT * FRO... missingValue" />
-            <marker date="1492316264041" expanded="true" signature="1899:1954" ph="SELECT * FRO... missingValue" />
+            <marker date="1492321372638" expanded="true" signature="802:842" ph="SELECT * FRO... missingValue" />
+            <marker date="1492321372638" expanded="true" signature="1345:1387" ph="INSERT INTO state... " />
+            <marker date="1492321372638" expanded="true" signature="1749:1776" ph="SELECT id FR... missingValue" />
+            <marker date="1492321372638" expanded="true" signature="1749:1782" ph="SELECT id FR... state" />
+            <marker date="1492321372638" expanded="true" signature="2857:2901" ph="SELECT leade... player" />
           </folding>
         </state>
       </provider>

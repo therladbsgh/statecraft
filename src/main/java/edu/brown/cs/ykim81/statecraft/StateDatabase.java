@@ -2,10 +2,7 @@ package edu.brown.cs.ykim81.statecraft;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.logging.Level;
 
 /**
@@ -14,28 +11,29 @@ import java.util.logging.Level;
 public class StateDatabase extends Database {
 
   String dbName;
+  String tableName = "state";
 
   public StateDatabase(Main instance) {
     super(instance);
-    dbName = plugin.getConfig().getString("SQLite.Filename", "state");
+    dbName = plugin.getConfig().getString("SQLite.Filename", "statecraft");
   }
 
-  public String SQLiteCreateTokensTable = "CREATE TABLE IF NOT EXISTS state (" + // make sure to put your table name in here too.
-          "`player` varchar(32) NOT NULL," + // This creates the different colums you will save data too. varchar(32) Is a string, int = integer
-          "`kills` int(11) NOT NULL," +
-          "`total` int(11) NOT NULL," +
-          "PRIMARY KEY (`player`)" +  // This is creating 3 colums Player, Kills, Total. Primary key is what you are going to use as your indexer. Here we want to use player so
-          ");"; // we can search by player, and get kills and total. If you some how were searching kills it would provide total and player.
+  public String SQLiteCreateTokensTable = "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
+          "`id` INTEGER NOT NULL," +
+          "`name` TEXT NOT NULL," +
+          "`money` INTEGER NOT NULL," +
+          "PRIMARY KEY (`id`)" +
+          ");";
 
 
   @Override
   public Connection getSqlConnection() {
-    File dataFolder = new File(plugin.getDataFolder(), dbName+".db");
+    File dataFolder = new File(plugin.getDataFolder(), dbName + ".sqlite");
     if (!dataFolder.exists()){
       try {
         dataFolder.createNewFile();
       } catch (IOException e) {
-        plugin.getLogger().log(Level.SEVERE, "File write error: "+dbName+".db");
+        plugin.getLogger().log(Level.SEVERE, "File write error: "+ dbName + ".sqlite");
       }
     }
 
@@ -66,5 +64,17 @@ public class StateDatabase extends Database {
       e.printStackTrace();
     }
     initialize();
+  }
+
+  @Override
+  public void initialize() {
+    connection = getSqlConnection();
+    try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM " + tableName + " LIMIT 1;")) {
+      try (ResultSet rs = ps.executeQuery()) {
+
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, "Unable to retreive connection", e);
+    }
   }
 }

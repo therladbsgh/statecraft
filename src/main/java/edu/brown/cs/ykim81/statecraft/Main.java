@@ -8,13 +8,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Main extends JavaPlugin {
 
   private Database stateDatabase;
+  private Database playerDatabase;
 
   @Override
   public void onEnable() {
     //Fired when the server enables the plugin
-    getLogger().info("StateCraft Enabled.");
-    this.getCommand("sc").setExecutor(new CommandCreate());
-
     try {
       if (!getDataFolder().exists()) {
         getDataFolder().mkdirs();
@@ -25,6 +23,11 @@ public class Main extends JavaPlugin {
 
     this.stateDatabase = new StateDatabase(this);
     this.stateDatabase.load();
+    this.playerDatabase = new PlayerDatabase(this);
+    this.playerDatabase.load();
+
+    this.getCommand("sc").setExecutor(new CommandCreate(stateDatabase, playerDatabase));
+    getLogger().info("StateCraft Enabled.");
   }
 
   @Override
@@ -35,5 +38,9 @@ public class Main extends JavaPlugin {
 
   public Database getStateDatabase() {
     return stateDatabase;
+  }
+
+  public Database getPlayerDatabase() {
+    return playerDatabase;
   }
 }
