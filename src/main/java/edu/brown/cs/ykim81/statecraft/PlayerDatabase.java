@@ -19,9 +19,10 @@ public class PlayerDatabase extends Database {
   }
 
   public String SQLiteCreateTokensTable = "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
-          "`id` INTEGER NOT NULL," +
+          "`id` TEXT NOT NULL," +
           "`state` INTEGER NOT NULL," +
           "`leader` INTEGER NOT NULL," +
+          "PRIMARY KEY (`id`)" +
           "FOREIGN KEY (`state`) REFERENCES state(id)" +
           "ON DELETE CASCADE ON UPDATE CASCADE" +
           ");";

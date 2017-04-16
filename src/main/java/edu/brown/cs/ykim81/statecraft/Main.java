@@ -26,6 +26,8 @@ public class Main extends JavaPlugin {
     this.playerDatabase = new PlayerDatabase(this);
     this.playerDatabase.load();
 
+    getServer().getPluginManager().registerEvents(new TaxListener(stateDatabase), this);
+
     this.getCommand("sc").setExecutor(new CommandCreate(stateDatabase, playerDatabase));
     getLogger().info("StateCraft Enabled.");
   }

@@ -21,7 +21,8 @@ public class StateDatabase extends Database {
   public String SQLiteCreateTokensTable = "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
           "`id` INTEGER NOT NULL," +
           "`name` TEXT NOT NULL," +
-          "`money` INTEGER NOT NULL," +
+          "`money` REAL NOT NULL," +
+          "`tax` INTEGER NOT NULL," +
           "PRIMARY KEY (`id`)" +
           ");";
 

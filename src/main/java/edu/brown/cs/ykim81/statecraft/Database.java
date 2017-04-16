@@ -15,9 +15,7 @@ public abstract class Database {
 
   Main plugin;
   Connection connection;
-  // The name of the table we created back in SQLite class.
-  public String table = "state";
-  public int tokens = 0;
+
   public Database(Main instance){
     plugin = instance;
   }
@@ -48,7 +46,7 @@ public abstract class Database {
 
   public void addNewState(String name) {
     try (Connection conn = getSqlConnection()) {
-      try (PreparedStatement ps = conn.prepareStatement("INSERT INTO state(name, money) VALUES(?,0)")) {
+      try (PreparedStatement ps = conn.prepareStatement("INSERT INTO state(name, money, tax) VALUES(?,0,0)")) {
         ps.setString(1, name);
         ps.executeUpdate();
         return;
@@ -112,6 +110,64 @@ public abstract class Database {
     } catch (SQLException e) {
       plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
       return false;
+    }
+  }
+
+  public String getStateFromPlayer(String name) {
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("SELECT state FROM player WHERE id=?;")) {
+        ps.setString(1, name);
+        try (ResultSet rs = ps.executeQuery()) {
+          rs.next();
+          return rs.getString("state");
+        }
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+      return "";
+    } catch (Exception e) {
+      return "";
+    }
+  }
+
+  public void updateTaxOfState(String stateId, int tax) {
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("UPDATE state SET tax = ? WHERE id = ?;")) {
+        ps.setInt(1, tax);
+        ps.setString(2, stateId);
+        ps.executeUpdate();
+        return;
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+    }
+  }
+
+  public int getTaxOfState(String stateId) {
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("SELECT tax FROM state WHERE id=?;")) {
+        ps.setString(1, stateId);
+        try (ResultSet rs = ps.executeQuery()) {
+          rs.next();
+          return rs.getInt("tax");
+        }
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+      return -1;
+    }
+  }
+
+  public void updateMoneyOfState(double money, String stateId) {
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("UPDATE state SET money = money + ? WHERE id = ?;")) {
+        ps.setDouble(1, money);
+        ps.setString(2, stateId);
+        ps.executeUpdate();
+        return;
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
     }
   }
 
