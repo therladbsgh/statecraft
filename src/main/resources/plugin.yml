@@ -5,4 +5,4 @@ main: edu.brown.cs.ykim81.statecraft.Main
 commands:
   sc:
     description: Your description
-    usage: /sc <args>
+    usage: Command not found. Type /sc help for a list of commands.

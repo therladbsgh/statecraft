@@ -146,6 +146,33 @@ public abstract class Database {
     }
   }
 
+  public int countState(Map<String, Object> params) {
+    List<String> paramList = new ArrayList<>();
+    List<String> keys = new ArrayList<>(params.keySet());
+    for (String s : keys) {
+      paramList.add(s + "=?");
+    }
+    String param = StringUtils.join(paramList, " AND ");
+
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) FROM states WHERE " + param + ";")) {
+        for (int i = 0; i < keys.size(); i++) {
+          ps.setObject(i + 1, params.get(keys.get(i)));
+        }
+        try (ResultSet rs = ps.executeQuery()) {
+          if (rs.next()) {
+            return rs.getInt(1);
+          } else {
+            return 0;
+          }
+        }
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+      return 0;
+    }
+  }
+
   public PlayerProxy createPlayer(String id, int state, int leader) {
     try (Connection conn = getSqlConnection()) {
       try (PreparedStatement ps = conn.prepareStatement("INSERT INTO players(id, state, leader) VALUES(?,?,?)")) {
@@ -249,6 +276,33 @@ public abstract class Database {
       }
     } catch (SQLException e) {
       plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+    }
+  }
+
+  public int countPlayer(Map<String, Object> params) {
+    List<String> paramList = new ArrayList<>();
+    List<String> keys = new ArrayList<>(params.keySet());
+    for (String s : keys) {
+      paramList.add(s + "=?");
+    }
+    String param = StringUtils.join(paramList, " AND ");
+
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) FROM players WHERE " + param + ";")) {
+        for (int i = 0; i < keys.size(); i++) {
+          ps.setObject(i + 1, params.get(keys.get(i)));
+        }
+        try (ResultSet rs = ps.executeQuery()) {
+          if (rs.next()) {
+            return rs.getInt(1);
+          } else {
+            return 0;
+          }
+        }
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+      return 0;
     }
   }
 
