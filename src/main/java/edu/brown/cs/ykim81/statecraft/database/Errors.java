@@ -1,4 +1,4 @@
-package edu.brown.cs.ykim81.statecraft;
+package edu.brown.cs.ykim81.statecraft.database;
 
 /**
  * Created by therl on 4/15/2017.

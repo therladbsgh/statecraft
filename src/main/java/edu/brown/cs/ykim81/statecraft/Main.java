@@ -1,5 +1,7 @@
 package edu.brown.cs.ykim81.statecraft;
 
+import edu.brown.cs.ykim81.statecraft.database.Database;
+import edu.brown.cs.ykim81.statecraft.database.SqliteDb;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -7,8 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class Main extends JavaPlugin {
 
-  private Database stateDatabase;
-  private Database playerDatabase;
+  private Database db;
 
   @Override
   public void onEnable() {
@@ -21,14 +22,12 @@ public class Main extends JavaPlugin {
       e.printStackTrace();
     }
 
-    this.stateDatabase = new StateDatabase(this);
-    this.stateDatabase.load();
-    this.playerDatabase = new PlayerDatabase(this);
-    this.playerDatabase.load();
+    this.db = new SqliteDb(this);
+    this.db.load();
 
-    getServer().getPluginManager().registerEvents(new TaxListener(stateDatabase), this);
+    getServer().getPluginManager().registerEvents(new TaxListener(db), this);
 
-    this.getCommand("sc").setExecutor(new CommandCreate(stateDatabase, playerDatabase));
+    this.getCommand("sc").setExecutor(new CommandCreate(db));
     getLogger().info("StateCraft Enabled.");
   }
 
@@ -38,11 +37,8 @@ public class Main extends JavaPlugin {
     getLogger().info("StateCraft disabled.");
   }
 
-  public Database getStateDatabase() {
-    return stateDatabase;
+  public Database getPluginDatabase() {
+    return db;
   }
 
-  public Database getPlayerDatabase() {
-    return playerDatabase;
-  }
 }

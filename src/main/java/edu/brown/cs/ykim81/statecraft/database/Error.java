@@ -1,4 +1,6 @@
-package edu.brown.cs.ykim81.statecraft;
+package edu.brown.cs.ykim81.statecraft.database;
+
+import edu.brown.cs.ykim81.statecraft.Main;
 
 import java.util.logging.Level;
 

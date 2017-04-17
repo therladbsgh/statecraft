@@ -1,4 +1,6 @@
-package edu.brown.cs.ykim81.statecraft;
+package edu.brown.cs.ykim81.statecraft.database;
+
+import edu.brown.cs.ykim81.statecraft.Main;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,17 +10,24 @@ import java.util.logging.Level;
 /**
  * Created by therl on 4/15/2017.
  */
-public class PlayerDatabase extends Database {
+public class SqliteDb extends Database {
 
   String dbName;
-  String tableName = "player";
 
-  public PlayerDatabase(Main instance) {
+  public SqliteDb(Main instance) {
     super(instance);
     dbName = plugin.getConfig().getString("SQLite.Filename", "statecraft");
   }
 
-  public String SQLiteCreateTokensTable = "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
+  public String SQLiteCreateStatesTable = "CREATE TABLE IF NOT EXISTS states (" +
+          "`id` INTEGER NOT NULL," +
+          "`name` TEXT NOT NULL," +
+          "`money` REAL NOT NULL," +
+          "`tax` INTEGER NOT NULL," +
+          "PRIMARY KEY (`id`)" +
+          ");";
+
+  public String SQLiteCreatePlayersTable = "CREATE TABLE IF NOT EXISTS players (" +
           "`id` TEXT NOT NULL," +
           "`state` INTEGER NOT NULL," +
           "`leader` INTEGER NOT NULL," +
@@ -60,7 +69,8 @@ public class PlayerDatabase extends Database {
     connection = getSqlConnection();
     try {
       Statement s = connection.createStatement();
-      s.executeUpdate(SQLiteCreateTokensTable);
+      s.executeUpdate(SQLiteCreateStatesTable);
+      s.executeUpdate(SQLiteCreatePlayersTable);
       s.close();
     } catch (SQLException e) {
       e.printStackTrace();
@@ -71,12 +81,20 @@ public class PlayerDatabase extends Database {
   @Override
   public void initialize() {
     connection = getSqlConnection();
-    try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM " + tableName + " LIMIT 1;")) {
+    try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM states LIMIT 1;")) {
       try (ResultSet rs = ps.executeQuery()) {
 
       }
     } catch (SQLException e) {
-      plugin.getLogger().log(Level.SEVERE, "Unable to retreive connection", e);
+      plugin.getLogger().log(Level.SEVERE, "Unable to retreive connection for states", e);
+    }
+
+    try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM players LIMIT 1;")) {
+      try (ResultSet rs = ps.executeQuery()) {
+
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, "Unable to retreive connection for players", e);
     }
   }
 }
