@@ -333,4 +333,89 @@ public abstract class Database {
     }
   }
 
+  public void createChunk(double x, double z, int state) {
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("INSERT INTO chunks(x, z, state) VALUES(?,?,?)")) {
+        ps.setDouble(1, x);
+        ps.setDouble(2, z);
+        ps.setInt(3, state);
+        ps.executeUpdate();
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+    }
+  }
+
+  public boolean chunkExists(Map<String, Object> params) {
+    List<String> paramList = new ArrayList<>();
+    List<String> keys = new ArrayList<>(params.keySet());
+    for (String s : keys) {
+      paramList.add(s + "=?");
+    }
+    String param = StringUtils.join(paramList, " AND ");
+
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM chunks WHERE " + param + " LIMIT 1;")) {
+        for (int i = 0; i < keys.size(); i++) {
+          ps.setObject(i + 1, params.get(keys.get(i)));
+        }
+        try (ResultSet rs = ps.executeQuery()) {
+          if (rs.next()) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+      return false;
+    }
+  }
+
+  public List<ChunkProxy> getChunk(Map<String, Object> params) {
+    List<String> paramList = new ArrayList<>();
+    List<String> keys = new ArrayList<>(params.keySet());
+    for (String s : keys) {
+      paramList.add(s + "=?");
+    }
+    String param = StringUtils.join(paramList, " AND ");
+
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("SELECT x, z, state FROM chunks WHERE " + param + ";")) {
+        for (int i = 0; i < keys.size(); i++) {
+          ps.setObject(i + 1, params.get(keys.get(i)));
+        }
+        try (ResultSet rs = ps.executeQuery()) {
+          List<ChunkProxy> chunks = new ArrayList<>();
+          while (rs.next()) {
+            double x = rs.getDouble(1);
+            double z = rs.getDouble(2);
+            int state = rs.getInt(3);
+            chunks.add(new ChunkProxy(x, z, state));
+          }
+          return chunks;
+        }
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+      return new ArrayList<>();
+    }
+  }
+
+  public void deleteChunk(double x, double z) {
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("DELETE FROM chunks WHERE x=? AND z=?;")) {
+        ps.setDouble(1, x);
+        ps.setDouble(2, z);
+        ps.executeUpdate();
+        return;
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+    }
+  }
+
+
+
 }

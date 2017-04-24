@@ -1,10 +1,12 @@
 package edu.brown.cs.ykim81.statecraft;
 
 import com.google.common.collect.ImmutableMap;
+import edu.brown.cs.ykim81.statecraft.database.ChunkProxy;
 import edu.brown.cs.ykim81.statecraft.database.Database;
 import edu.brown.cs.ykim81.statecraft.database.PlayerProxy;
 import edu.brown.cs.ykim81.statecraft.database.StateProxy;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -37,56 +39,90 @@ public class CommandCreate implements CommandExecutor {
       return leaveState(sender);
     } else if (strings.length == 1 && strings[0].equals("info")) {
       return getStateInfo(sender);
-    } else if (strings.length == 1 && strings[0].equals("help")) {
+    } else if (strings.length == 1 && strings[0].equals("help")){
       return getHelp(sender);
+    } else if (strings.length == 2 && strings[0].equals("help")) {
+      return getHelp(sender, strings[1]);
     } else if (strings.length == 2 && strings[0].equals("invite")) {
       return invitePlayer(sender, strings[1]);
     } else if (strings.length == 1 && strings[0].equals("accept")) {
       return acceptInvite(sender);
     } else if (strings.length == 1 && strings[0].equals("reject")) {
       return rejectInvite(sender);
+    } else if (strings.length == 1 && strings[0].equals("claim")) {
+      return claimChunk(sender);
+    } else if (strings.length == 1 && strings[0].equals("unclaim")) {
+      return unclaimChunk(sender);
     }
     return false;
   }
 
   private boolean getHelp(CommandSender sender) {
     sender.sendMessage("----SC Help----");
-    sender.sendMessage("/sc create [name]: Creates a state");
-    sender.sendMessage("/sc info: Gets the info of your state");
-    sender.sendMessage("/sc tax [number]: Sets the tax rate of your state");
-    sender.sendMessage("/sc leave: Abandon your citizenship");
-    sender.sendMessage("/sc invite [name]: Invites a player to the state");
-    sender.sendMessage("/sc accept: Accepts an invite from a state");
-    sender.sendMessage("/sc reject: Rejects an invite from a state");
+    sender.sendMessage("/sc help general: General commands");
+    sender.sendMessage("/sc help leader: Leader commands");
+    sender.sendMessage("/sc help citizen: Citizen commands");
     return true;
   }
 
-  private boolean createState(CommandSender sender, String name) {
-    if (sender instanceof Player) {
-      Player player = (Player) sender;
-
-      if (name.length() == 0) {
-        player.sendMessage("ERROR: State name must not be empty.");
-        return true;
-      }
-
-      if (playerIsLeader(player.getUniqueId().toString())) {
-        sender.sendMessage("ERROR: You are already a leader of a state!");
-        return true;
-      }
-
-      if (!db.searchState(ImmutableMap.<String, Object>of("name", name))) {
-        StateProxy state = db.createState(name);
-        db.createPlayer(player.getUniqueId().toString(), state.getId(), 1);
-        sender.sendMessage("State " + name + " created.");
-      } else {
-        sender.sendMessage("ERROR: State name already exists.");
-        return true;
-      }
+  private boolean getHelp(CommandSender sender, String arg) {
+    if (arg.equals("leader")) {
+      sender.sendMessage("----SC Leader Commands----");
+      sender.sendMessage("/sc tax [number]: Sets the tax rate of your state");
+      sender.sendMessage("/sc claim: Claim the chunk you are standing on");
+      sender.sendMessage("/sc unclaim: Unclaim the chunk that you are standing on");
+      return true;
+    } else if (arg.equals("general")) {
+      sender.sendMessage("----SC General Commands----");
+      sender.sendMessage("/sc create [name]: Creates a state");
+      sender.sendMessage("/sc info: Gets the info of your state");
+      sender.sendMessage("/sc leave: Abandon your citizenship");
+      sender.sendMessage("/sc invite [name]: Invites a player to the state");
+      sender.sendMessage("/sc accept: Accepts an invite from a state");
+      sender.sendMessage("/sc reject: Rejects an invite from a state");
+      return true;
+    } else if (arg.equals("citizen")) {
+      sender.sendMessage("----SC Citizen Commands----");
+      sender.sendMessage("None yet!");
+      return true;
     } else {
+      return getHelp(sender);
+    }
+  }
+
+  private boolean createState(CommandSender sender, String name) {
+    if (!(sender instanceof Player)) {
       sender.sendMessage("You must be a player!");
       return false;
     }
+    Player player = (Player) sender;
+
+    if (name.length() == 0) {
+      player.sendMessage("ERROR: State name must not be empty.");
+      return true;
+    }
+
+    if (playerIsLeader(player.getUniqueId().toString())) {
+      sender.sendMessage("ERROR: You are already a leader of a state!");
+      return true;
+    }
+
+    if (db.searchState(ImmutableMap.<String, Object>of("name", name))) {
+      sender.sendMessage("ERROR: State name already exists.");
+      return true;
+    }
+
+    Chunk chunk = player.getWorld().getChunkAt(player.getLocation());
+    List<ChunkProxy> chunkList = db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ()));
+    if (chunkList.size() > 0) {
+      sender.sendMessage("ERROR: You cannot start a state on claimed land.");
+      return true;
+    }
+
+    StateProxy state = db.createState(name);
+    db.createPlayer(player.getUniqueId().toString(), state.getId(), 1);
+    claimChunk(sender);
+    sender.sendMessage("State " + name + " created.");
     return true;
   }
 
@@ -284,6 +320,78 @@ public class CommandCreate implements CommandExecutor {
 
     invitedPlayers.remove(player.getUniqueId().toString());
     sender.sendMessage("You have rejected the offer.");
+    return true;
+  }
+
+  /**
+   * BUG: Assumes a relation in the player database = player is in a state.
+   * Assumes Player UUID is unique (it should be).
+   *
+   * @param sender
+   * @return
+   */
+  public boolean claimChunk(CommandSender sender) {
+    if (!(sender instanceof Player)) {
+      sender.sendMessage("You must be a player!");
+      return false;
+    }
+    Player player = (Player) sender;
+
+    if (!playerIsLeader(player.getUniqueId().toString())) {
+      sender.sendMessage("ERROR: You must be a leader to do this.");
+      return true;
+    }
+
+    List<PlayerProxy> playerList = db.readPlayer(ImmutableMap.<String, Object>of("id", player.getUniqueId().toString()));
+    if (playerList.size() == 0) {
+      sender.sendMessage("ERROR: You are not in a state!");
+      return true;
+    }
+
+    Chunk chunk = player.getWorld().getChunkAt(player.getLocation());
+    List<ChunkProxy> chunkList = db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ()));
+    if (chunkList.size() > 0) {
+      sender.sendMessage("ERROR: This land is already claimed.");
+      return true;
+    }
+
+    db.createChunk(chunk.getX(), chunk.getZ(), playerList.get(0).getState());
+    sender.sendMessage("You have claimed the land.");
+    return true;
+  }
+
+  public boolean unclaimChunk(CommandSender sender) {
+    if (!(sender instanceof Player)) {
+      sender.sendMessage("You must be a player!");
+      return false;
+    }
+    Player player = (Player) sender;
+
+    if (!playerIsLeader(player.getUniqueId().toString())) {
+      sender.sendMessage("ERROR: You must be a leader to do this.");
+      return true;
+    }
+
+    List<PlayerProxy> playerList = db.readPlayer(ImmutableMap.<String, Object>of("id", player.getUniqueId().toString()));
+    if (playerList.size() == 0) {
+      sender.sendMessage("ERROR: You are not in a state!");
+      return true;
+    }
+
+    Chunk chunk = player.getWorld().getChunkAt(player.getLocation());
+    List<ChunkProxy> chunkList = db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ()));
+    if (chunkList.size() == 0) {
+      sender.sendMessage("ERROR: This land is not claimed.");
+      return true;
+    }
+
+    if (chunkList.get(0).getId() != playerList.get(0).getState()) {
+      sender.sendMessage("ERROR: This is not your state land!");
+      return true;
+    }
+
+    db.deleteChunk(chunk.getX(), chunk.getZ());
+    sender.sendMessage("You have unclaimed the land.");
     return true;
   }
 
