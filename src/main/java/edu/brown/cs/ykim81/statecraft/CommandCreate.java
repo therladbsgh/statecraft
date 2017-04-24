@@ -166,7 +166,21 @@ public class CommandCreate implements CommandExecutor {
     int stateId = playerList.get(0).getState();
     StateProxy state = db.readState(ImmutableMap.<String, Object>of("id", stateId)).get(0);
 
-    sender.sendMessage("State name: " + state.getName());
+    List<PlayerProxy> players = db.readPlayer(ImmutableMap.<String, Object>of("state", stateId));
+    List<String> leaders = new ArrayList<>();
+    List<String> nonLeaders = new ArrayList<>();
+
+    for (PlayerProxy p : players) {
+      if (playerIsLeader(p.getId())) {
+        leaders.add(db.getNameFromId(p.getId()));
+      } else {
+        nonLeaders.add(db.getNameFromId(p.getId()));
+      }
+    }
+
+    sender.sendMessage("----" + state.getName() + "----");
+    sender.sendMessage("Leaders: " + String.join(", ", leaders));
+    sender.sendMessage("Citizens: " + String.join(", ", nonLeaders));
     sender.sendMessage("Funds: $" + state.getMoney());
     sender.sendMessage("Tax rate: " + state.getTax());
     return true;

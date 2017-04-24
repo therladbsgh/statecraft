@@ -306,4 +306,31 @@ public abstract class Database {
     }
   }
 
+  public void addName(String id, String name) {
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO names(id, name) VALUES(?,?)")) {
+        ps.setString(1, id);
+        ps.setString(2, name);
+        ps.executeUpdate();
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+    }
+  }
+
+  public String getNameFromId(String id) {
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("SELECT name FROM names WHERE id=?;")) {
+        ps.setString(1, id);
+        try (ResultSet rs = ps.executeQuery()) {
+          rs.next();
+          return rs.getString(1);
+        }
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+      return null;
+    }
+  }
+
 }

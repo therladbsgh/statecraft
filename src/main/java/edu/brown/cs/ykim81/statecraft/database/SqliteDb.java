@@ -36,6 +36,12 @@ public class SqliteDb extends Database {
           "ON DELETE CASCADE ON UPDATE CASCADE" +
           ");";
 
+  public String SQLiteCreateUserNameTable = "CREATE TABLE IF NOT EXISTS names (" +
+          "`id` TEXT NOT NULL," +
+          "`name` TEXT NOT NULL," +
+          "PRIMARY KEY (`id`)" +
+          ");";
+
 
   @Override
   public Connection getSqlConnection() {
@@ -71,6 +77,7 @@ public class SqliteDb extends Database {
       Statement s = connection.createStatement();
       s.executeUpdate(SQLiteCreateStatesTable);
       s.executeUpdate(SQLiteCreatePlayersTable);
+      s.executeUpdate(SQLiteCreateUserNameTable);
       s.close();
     } catch (SQLException e) {
       e.printStackTrace();
@@ -95,6 +102,14 @@ public class SqliteDb extends Database {
       }
     } catch (SQLException e) {
       plugin.getLogger().log(Level.SEVERE, "Unable to retreive connection for players", e);
+    }
+
+    try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM names LIMIT 1;")) {
+      try (ResultSet rs = ps.executeQuery()) {
+
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, "Unable to retreive connection for names", e);
     }
   }
 }

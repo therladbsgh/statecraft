@@ -42,7 +42,7 @@ public class TaxListener implements Listener {
 
   @EventHandler
   public void onPlayerJoin(PlayerJoinEvent event) {
-    System.out.println("Player joined");
+    db.addName(event.getPlayer().getUniqueId().toString(), event.getPlayer().getName());
   }
 
 }
