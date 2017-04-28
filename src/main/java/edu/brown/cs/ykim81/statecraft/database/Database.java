@@ -306,39 +306,13 @@ public abstract class Database {
     }
   }
 
-  public void addName(String id, String name) {
+  public void createChunk(double x, double z, int state, District district) {
     try (Connection conn = getSqlConnection()) {
-      try (PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO names(id, name) VALUES(?,?)")) {
-        ps.setString(1, id);
-        ps.setString(2, name);
-        ps.executeUpdate();
-      }
-    } catch (SQLException e) {
-      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
-    }
-  }
-
-  public String getNameFromId(String id) {
-    try (Connection conn = getSqlConnection()) {
-      try (PreparedStatement ps = conn.prepareStatement("SELECT name FROM names WHERE id=?;")) {
-        ps.setString(1, id);
-        try (ResultSet rs = ps.executeQuery()) {
-          rs.next();
-          return rs.getString(1);
-        }
-      }
-    } catch (SQLException e) {
-      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
-      return null;
-    }
-  }
-
-  public void createChunk(double x, double z, int state) {
-    try (Connection conn = getSqlConnection()) {
-      try (PreparedStatement ps = conn.prepareStatement("INSERT INTO chunks(x, z, state) VALUES(?,?,?)")) {
+      try (PreparedStatement ps = conn.prepareStatement("INSERT INTO chunks(x, z, state, district) VALUES(?,?,?,?)")) {
         ps.setDouble(1, x);
         ps.setDouble(2, z);
         ps.setInt(3, state);
+        ps.setString(4, district.toString());
         ps.executeUpdate();
       }
     } catch (SQLException e) {
@@ -382,7 +356,7 @@ public abstract class Database {
     String param = StringUtils.join(paramList, " AND ");
 
     try (Connection conn = getSqlConnection()) {
-      try (PreparedStatement ps = conn.prepareStatement("SELECT x, z, state FROM chunks WHERE " + param + ";")) {
+      try (PreparedStatement ps = conn.prepareStatement("SELECT x, z, state, district FROM chunks WHERE " + param + ";")) {
         for (int i = 0; i < keys.size(); i++) {
           ps.setObject(i + 1, params.get(keys.get(i)));
         }
@@ -392,7 +366,8 @@ public abstract class Database {
             double x = rs.getDouble(1);
             double z = rs.getDouble(2);
             int state = rs.getInt(3);
-            chunks.add(new ChunkProxy(x, z, state));
+            String district = rs.getString(4);
+            chunks.add(new ChunkProxy(x, z, state, District.fromString(district)));
           }
           return chunks;
         }
@@ -400,6 +375,29 @@ public abstract class Database {
     } catch (SQLException e) {
       plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
       return new ArrayList<>();
+    }
+  }
+
+  public void updateChunk(double x, double z, Map<String, Object> params) {
+    List<String> paramList = new ArrayList<>();
+    List<String> keys = new ArrayList<>(params.keySet());
+    for (String s : keys) {
+      paramList.add(s + "=?");
+    }
+    String param = StringUtils.join(paramList, " AND ");
+
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("UPDATE chunks SET " + param + " WHERE x=? AND z=?;")) {
+        for (int i = 0; i < keys.size(); i++) {
+          ps.setObject(i + 1, params.get(keys.get(i)));
+        }
+        ps.setDouble(keys.size() + 1, x);
+        ps.setDouble(keys.size() + 2, z);
+        ps.executeUpdate();
+        return;
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
     }
   }
 

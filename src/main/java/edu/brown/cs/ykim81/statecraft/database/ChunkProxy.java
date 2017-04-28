@@ -8,11 +8,13 @@ public class ChunkProxy {
   private double x;
   private double z;
   private int stateId;
+  private District district;
 
-  public ChunkProxy(double x, double z, int stateId) {
+  public ChunkProxy(double x, double z, int stateId, District district) {
     this.x = x;
     this.z = z;
     this.stateId = stateId;
+    this.district = district;
   }
 
   public double getX() {
@@ -25,6 +27,10 @@ public class ChunkProxy {
 
   public int getId() {
     return stateId;
+  }
+
+  public District getDistrict() {
+    return district;
   }
 
   @Override

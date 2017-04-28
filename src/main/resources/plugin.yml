@@ -2,6 +2,7 @@ name: StateCraft
 version: 0.0.1
 author: Andrew Kim
 main: edu.brown.cs.ykim81.statecraft.Main
+depend: [Vault]
 commands:
   sc:
     description: Your description

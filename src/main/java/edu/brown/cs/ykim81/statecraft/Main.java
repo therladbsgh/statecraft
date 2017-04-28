@@ -2,7 +2,11 @@ package edu.brown.cs.ykim81.statecraft;
 
 import edu.brown.cs.ykim81.statecraft.database.Database;
 import edu.brown.cs.ykim81.statecraft.database.SqliteDb;
+import net.milkbowl.vault.economy.Economy;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.logging.Logger;
 
 /**
  * Created by therl on 4/15/2017.
@@ -10,6 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class Main extends JavaPlugin {
 
   private Database db;
+  private static Economy econ = null;
 
   @Override
   public void onEnable() {
@@ -22,10 +27,17 @@ public class Main extends JavaPlugin {
       e.printStackTrace();
     }
 
+    if (!setupEconomy() ) {
+      Logger.getLogger("Minecraft").severe("Disabled due to no Vault dependency found!");
+      getServer().getPluginManager().disablePlugin(this);
+      return;
+    }
+
     this.db = new SqliteDb(this);
     this.db.load();
 
     getServer().getPluginManager().registerEvents(new TaxListener(db), this);
+    getServer().getPluginManager().registerEvents(new StateListener(db, econ), this);
 
     this.getCommand("sc").setExecutor(new CommandCreate(db));
     getLogger().info("StateCraft Enabled.");
@@ -39,6 +51,18 @@ public class Main extends JavaPlugin {
 
   public Database getPluginDatabase() {
     return db;
+  }
+
+  private boolean setupEconomy() {
+    if (getServer().getPluginManager().getPlugin("Vault") == null) {
+      return false;
+    }
+    RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+    if (rsp == null) {
+      return false;
+    }
+    econ = rsp.getProvider();
+    return econ != null;
   }
 
 }

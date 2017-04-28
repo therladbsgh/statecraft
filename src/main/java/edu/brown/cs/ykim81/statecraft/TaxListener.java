@@ -23,11 +23,9 @@ import java.util.UUID;
 public class TaxListener implements Listener {
 
   private Database db;
-  private Map<UUID, Integer> playerToState;
 
   public TaxListener(Database db) {
     this.db = db;
-    this.playerToState = new HashMap<>();
   }
 
   @EventHandler
@@ -45,34 +43,6 @@ public class TaxListener implements Listener {
           db.updateState(stateId, ImmutableMap.<String, Object>of("money", stateBalance));
           event.getPlayer().sendMessage("$" + moneyToTake + " has been taken as tax.");
         }
-      }
-    }
-  }
-
-  @EventHandler
-  public void onPlayerJoin(PlayerJoinEvent event) {
-    db.addName(event.getPlayer().getUniqueId().toString(), event.getPlayer().getName());
-  }
-
-  @EventHandler
-  public void onPlayerMove(PlayerMoveEvent event) {
-    Chunk chunk = event.getPlayer().getWorld().getChunkAt(event.getPlayer().getLocation());
-    int currentState;
-    if (db.chunkExists(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ()))) {
-      ChunkProxy chunkProxy = db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ())).get(0);
-      currentState = chunkProxy.getId();
-    } else {
-      currentState = -1;
-    }
-
-    if (!playerToState.containsKey(event.getPlayer().getUniqueId())
-            || currentState != playerToState.get(event.getPlayer().getUniqueId()).intValue()) {
-      playerToState.put(event.getPlayer().getUniqueId(), currentState);
-      if (currentState == -1) {
-        event.getPlayer().sendMessage("~~Wilderness~~");
-      } else {
-        StateProxy stateProxy = db.readState(ImmutableMap.<String, Object>of("id", currentState)).get(0);
-        event.getPlayer().sendMessage("[" + stateProxy.getName() + "]");
       }
     }
   }

@@ -1,10 +1,7 @@
 package edu.brown.cs.ykim81.statecraft;
 
 import com.google.common.collect.ImmutableMap;
-import edu.brown.cs.ykim81.statecraft.database.ChunkProxy;
-import edu.brown.cs.ykim81.statecraft.database.Database;
-import edu.brown.cs.ykim81.statecraft.database.PlayerProxy;
-import edu.brown.cs.ykim81.statecraft.database.StateProxy;
+import edu.brown.cs.ykim81.statecraft.database.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.command.Command;
@@ -12,10 +9,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by therl on 4/15/2017.
@@ -53,6 +47,8 @@ public class CommandCreate implements CommandExecutor {
       return claimChunk(sender);
     } else if (strings.length == 1 && strings[0].equals("unclaim")) {
       return unclaimChunk(sender);
+    } else if (strings.length == 2 && strings[0].equals("district")) {
+      return setDistrictOfChunk(sender, strings[1]);
     }
     return false;
   }
@@ -71,6 +67,7 @@ public class CommandCreate implements CommandExecutor {
       sender.sendMessage("/sc tax [number]: Sets the tax rate of your state");
       sender.sendMessage("/sc claim: Claim the chunk you are standing on");
       sender.sendMessage("/sc unclaim: Unclaim the chunk that you are standing on");
+      sender.sendMessage("/sc district [type]: Sets the district of the chunk");
       return true;
     } else if (arg.equals("general")) {
       sender.sendMessage("----SC General Commands----");
@@ -208,9 +205,9 @@ public class CommandCreate implements CommandExecutor {
 
     for (PlayerProxy p : players) {
       if (playerIsLeader(p.getId())) {
-        leaders.add(db.getNameFromId(p.getId()));
+        leaders.add(Bukkit.getOfflinePlayer(UUID.fromString(p.getId())).getName());
       } else {
-        nonLeaders.add(db.getNameFromId(p.getId()));
+        nonLeaders.add(Bukkit.getOfflinePlayer(UUID.fromString(p.getId())).getName());
       }
     }
 
@@ -355,7 +352,7 @@ public class CommandCreate implements CommandExecutor {
       return true;
     }
 
-    db.createChunk(chunk.getX(), chunk.getZ(), playerList.get(0).getState());
+    db.createChunk(chunk.getX(), chunk.getZ(), playerList.get(0).getState(), District.STATE);
     sender.sendMessage("You have claimed the land.");
     return true;
   }
@@ -393,6 +390,68 @@ public class CommandCreate implements CommandExecutor {
     db.deleteChunk(chunk.getX(), chunk.getZ());
     sender.sendMessage("You have unclaimed the land.");
     return true;
+  }
+
+  public boolean setDistrictOfChunk(CommandSender sender, String district) {
+    if (!(sender instanceof Player)) {
+      sender.sendMessage("You must be a player!");
+      return false;
+    }
+    Player player = (Player) sender;
+
+    if (!playerIsLeader(player.getUniqueId().toString())) {
+      sender.sendMessage("ERROR: You must be a leader to do this.");
+      return true;
+    }
+
+    List<PlayerProxy> playerList = db.readPlayer(ImmutableMap.<String, Object>of("id", player.getUniqueId().toString()));
+    if (playerList.size() == 0) {
+      sender.sendMessage("ERROR: You are not in a state!");
+      return true;
+    }
+
+    Chunk chunk = player.getWorld().getChunkAt(player.getLocation());
+    List<ChunkProxy> chunkList = db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ()));
+    if (chunkList.size() == 0) {
+      sender.sendMessage("ERROR: This land is not claimed.");
+      return true;
+    }
+
+    if (chunkList.get(0).getId() != playerList.get(0).getState()) {
+      sender.sendMessage("ERROR: This is not your state land!");
+      return true;
+    }
+
+    switch (district.toLowerCase()) {
+      case "state":
+        db.updateChunk(chunk.getX(), chunk.getZ(), ImmutableMap.<String, Object>of("district", District.STATE.toString()));
+        sender.sendMessage("Updated district to State.");
+        return true;
+      case "primary":
+        db.updateChunk(chunk.getX(), chunk.getZ(), ImmutableMap.<String, Object>of("district", District.PRIMARY.toString()));
+        sender.sendMessage("Updated district to Primary.");
+        return true;
+      case "industrial":
+        db.updateChunk(chunk.getX(), chunk.getZ(), ImmutableMap.<String, Object>of("district", District.INDUSTRIAL.toString()));
+        sender.sendMessage("Updated district to Industrial.");
+        return true;
+      case "military":
+        db.updateChunk(chunk.getX(), chunk.getZ(), ImmutableMap.<String, Object>of("district", District.MILITARY.toString()));
+        sender.sendMessage("Updated district to Military.");
+        return true;
+      case "university":
+        db.updateChunk(chunk.getX(), chunk.getZ(), ImmutableMap.<String, Object>of("district", District.UNIVERSITY.toString()));
+        sender.sendMessage("Updated district to University.");
+        return true;
+      case "residential":
+        db.updateChunk(chunk.getX(), chunk.getZ(), ImmutableMap.<String, Object>of("district", District.RESIDENTIAL.toString()));
+        sender.sendMessage("Updated district to Residential.");
+        return true;
+      default:
+        sender.sendMessage("ERROR: Could not recognize state. ");
+        sender.sendMessage("Possible types: STATE, PRIMARY, INDUSTRIAL, MILITARY, UNIVERSITY, RESIDENTIAL");
+        return true;
+    }
   }
 
   private boolean playerIsLeader(String id) {

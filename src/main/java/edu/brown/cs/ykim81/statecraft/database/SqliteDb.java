@@ -36,16 +36,11 @@ public class SqliteDb extends Database {
           "ON DELETE CASCADE ON UPDATE CASCADE" +
           ");";
 
-  public String SQLiteCreateUserNameTable = "CREATE TABLE IF NOT EXISTS names (" +
-          "`id` TEXT NOT NULL," +
-          "`name` TEXT NOT NULL," +
-          "PRIMARY KEY (`id`)" +
-          ");";
-
   public String SQLiteCreateChunksTable = "CREATE TABLE IF NOT EXISTS chunks (" +
           "`x` REAL NOT NULL," +
           "`z` REAL NOT NULL," +
           "`state` INTEGER NOT NULL," +
+          "`district` TEXT NOT NULL," +
           "FOREIGN KEY (`state`) REFERENCES state(id)" +
           "ON DELETE CASCADE ON UPDATE CASCADE" +
           ");";
@@ -85,7 +80,6 @@ public class SqliteDb extends Database {
       Statement s = connection.createStatement();
       s.executeUpdate(SQLiteCreateStatesTable);
       s.executeUpdate(SQLiteCreatePlayersTable);
-      s.executeUpdate(SQLiteCreateUserNameTable);
       s.execute(SQLiteCreateChunksTable);
       s.close();
     } catch (SQLException e) {
@@ -111,14 +105,6 @@ public class SqliteDb extends Database {
       }
     } catch (SQLException e) {
       plugin.getLogger().log(Level.SEVERE, "Unable to retreive connection for players", e);
-    }
-
-    try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM names LIMIT 1;")) {
-      try (ResultSet rs = ps.executeQuery()) {
-
-      }
-    } catch (SQLException e) {
-      plugin.getLogger().log(Level.SEVERE, "Unable to retreive connection for names", e);
     }
 
     try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM chunks LIMIT 1;")) {
