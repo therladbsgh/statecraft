@@ -49,8 +49,32 @@ public class CommandCreate implements CommandExecutor {
       return unclaimChunk(sender);
     } else if (strings.length == 2 && strings[0].equals("district")) {
       return setDistrictOfChunk(sender, strings[1]);
+    } else if (strings.length == 1 && strings[0].equals("debug")) {
+      return debugMessage(sender);
     }
     return false;
+  }
+
+  private boolean debugMessage(CommandSender sender) {
+    if (!(sender instanceof Player)) {
+      sender.sendMessage("You must be a player!");
+      return false;
+    }
+    Player player = (Player) sender;
+
+    player.sendMessage("---DEBUG---");
+    if (player.hasPermission("sc.player.bandit")) {
+      player.sendMessage("You are a bandit.");
+    }
+
+    if (player.hasPermission("sc.player.citizen")) {
+      player.sendMessage("You are a citizen.");
+    }
+
+    if (player.hasPermission("sc.player.leader")) {
+      player.sendMessage("You are a leader.");
+    }
+    return true;
   }
 
   private boolean getHelp(CommandSender sender) {
@@ -119,6 +143,7 @@ public class CommandCreate implements CommandExecutor {
     StateProxy state = db.createState(name);
     db.createPlayer(player.getUniqueId().toString(), state.getId(), 1);
     claimChunk(sender);
+    PermissionsListener.makeLeader(player);
     sender.sendMessage("State " + name + " created.");
     return true;
   }
@@ -175,9 +200,14 @@ public class CommandCreate implements CommandExecutor {
     }
 
     db.deletePlayer(player.getUniqueId().toString());
+    PermissionsListener.makeBandit(player);
     sender.sendMessage("You have abandoned your citizenship.");
     if (playersInState == 1) {
       db.deleteState(stateId);
+      List<ChunkProxy> chunks = db.getChunk(ImmutableMap.<String, Object>of("state", stateId));
+      for (ChunkProxy c : chunks) {
+        db.deleteChunk(c.getX(), c.getZ());
+      }
       sender.sendMessage("As you were the last person, the state is now removed from existence.");
     }
     return true;
@@ -292,6 +322,7 @@ public class CommandCreate implements CommandExecutor {
 
     int stateId = invitedPlayers.get(player.getUniqueId().toString());
     db.createPlayer(player.getUniqueId().toString(), stateId, 0);
+    PermissionsListener.makeCitizen(player);
     invitedPlayers.remove(player.getUniqueId().toString());
     sender.sendMessage("You have now joined the state!");
     return true;

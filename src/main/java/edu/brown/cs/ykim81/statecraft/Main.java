@@ -3,9 +3,14 @@ package edu.brown.cs.ykim81.statecraft;
 import edu.brown.cs.ykim81.statecraft.database.Database;
 import edu.brown.cs.ykim81.statecraft.database.SqliteDb;
 import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.permission.Permission;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 /**
@@ -38,6 +43,7 @@ public class Main extends JavaPlugin {
 
     getServer().getPluginManager().registerEvents(new TaxListener(db), this);
     getServer().getPluginManager().registerEvents(new StateListener(db, econ), this);
+    getServer().getPluginManager().registerEvents(new PermissionsListener(db), this);
 
     this.getCommand("sc").setExecutor(new CommandCreate(db));
     getLogger().info("StateCraft Enabled.");
