@@ -1,16 +1,16 @@
 package edu.brown.cs.ykim81.statecraft;
 
+import edu.brown.cs.ykim81.statecraft.commands.CommandCreate;
 import edu.brown.cs.ykim81.statecraft.database.Database;
 import edu.brown.cs.ykim81.statecraft.database.SqliteDb;
+import edu.brown.cs.ykim81.statecraft.listeners.PermissionsListener;
+import edu.brown.cs.ykim81.statecraft.listeners.StateListener;
+import edu.brown.cs.ykim81.statecraft.listeners.TaxListener;
 import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.permission.Permission;
-import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.io.File;
 import java.util.logging.Logger;
 
 /**
@@ -30,6 +30,11 @@ public class Main extends JavaPlugin {
       }
     } catch (Exception e) {
       e.printStackTrace();
+    }
+
+    File file = new File(getDataFolder(), "CityCenter.schematic");
+    if (!file.exists()) {
+      saveResource("CityCenter.schematic", false);
     }
 
     if (!setupEconomy() ) {

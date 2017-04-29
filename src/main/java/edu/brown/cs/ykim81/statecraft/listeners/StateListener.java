@@ -1,4 +1,4 @@
-package edu.brown.cs.ykim81.statecraft;
+package edu.brown.cs.ykim81.statecraft.listeners;
 
 import com.google.common.collect.ImmutableMap;
 import edu.brown.cs.ykim81.statecraft.database.ChunkProxy;
@@ -41,7 +41,7 @@ public class StateListener implements Listener {
   public void onPlayerJoin(PlayerJoinEvent event) {
     System.out.println("Joined");
     ChunkProxy chunk = getCurrentChunk(event.getPlayer());
-    playerToState.put(event.getPlayer().getUniqueId(), chunk.getId());
+    playerToState.put(event.getPlayer().getUniqueId(), chunk.getStateId());
     playerToDistrict.put(event.getPlayer().getUniqueId(), chunk.getDistrict());
     setScoreboard(event.getPlayer());
   }
@@ -51,14 +51,14 @@ public class StateListener implements Listener {
     if (db.chunkExists(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ()))) {
       return db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ())).get(0);
     } else {
-      return new ChunkProxy(chunk.getX(), chunk.getZ(), -1, District.NULL);
+      return new ChunkProxy(-1, chunk.getX(), chunk.getZ(), -1, District.NULL);
     }
   }
 
   @EventHandler
   public void onPlayerMove(PlayerMoveEvent event) {
     ChunkProxy chunk = getCurrentChunk(event.getPlayer());
-    int currentState = chunk.getId();
+    int currentState = chunk.getStateId();
     District currentDistrict = chunk.getDistrict();
     int prevState = playerToState.get(event.getPlayer().getUniqueId()).intValue();
     District prevDistrict = playerToDistrict.get(event.getPlayer().getUniqueId());
@@ -113,11 +113,11 @@ public class StateListener implements Listener {
     ChunkProxy chunk = getCurrentChunk(player);
     String stateName;
     String districtName;
-    if (chunk.getId() == -1) {
+    if (chunk.getStateId() == -1) {
       stateName = "Wilderness";
       districtName = "None";
     } else {
-      stateName = db.readState(ImmutableMap.<String, Object>of("id", chunk.getId())).get(0).getName();
+      stateName = db.readState(ImmutableMap.<String, Object>of("id", chunk.getStateId())).get(0).getName();
       districtName = chunk.getDistrict().toString();
     }
 

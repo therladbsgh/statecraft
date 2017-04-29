@@ -5,8 +5,9 @@ package edu.brown.cs.ykim81.statecraft.database;
  */
 public enum District {
 
+  CITYCENTER ("City Center"),
   STATE ("State"),
-  PRIMARY ("Primary Economic"),
+  PRIMARY ("Agricultural"),
   INDUSTRIAL ("Industrial"),
   MILITARY ("Military"),
   UNIVERSITY ("University"),
@@ -26,9 +27,11 @@ public enum District {
 
   public static District fromString(String s) {
     switch (s.toUpperCase()) {
+      case "CITY CENTER":
+        return District.CITYCENTER;
       case "STATE":
         return District.STATE;
-      case "PRIMARY ECONOMIC":
+      case "AGRICULTURAL":
         return District.PRIMARY;
       case "INDUSTRIAL":
         return District.INDUSTRIAL;

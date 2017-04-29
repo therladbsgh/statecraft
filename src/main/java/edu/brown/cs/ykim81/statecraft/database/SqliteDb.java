@@ -37,11 +37,22 @@ public class SqliteDb extends Database {
           ");";
 
   public String SQLiteCreateChunksTable = "CREATE TABLE IF NOT EXISTS chunks (" +
+          "`id` INTEGER NOT NULL," +
           "`x` REAL NOT NULL," +
           "`z` REAL NOT NULL," +
           "`state` INTEGER NOT NULL," +
           "`district` TEXT NOT NULL," +
+          "PRIMARY KEY (`id`)" +
           "FOREIGN KEY (`state`) REFERENCES state(id)" +
+          "ON DELETE CASCADE ON UPDATE CASCADE" +
+          ");";
+
+  public String SQLiteCreateChunkBuildTable = "CREATE TABLE IF NOT EXISTS chunkbuilds (" +
+          "`userId` TEXT NOT NULL," +
+          "`chunkId` INTEGER NOT NULL," +
+          "FOREIGN KEY (`userId`) REFERENCES players(id)" +
+          "ON DELETE CASCADE ON UPDATE CASCADE," +
+          "FOREIGN KEY (`chunkId`) REFERENCES chunks(id)" +
           "ON DELETE CASCADE ON UPDATE CASCADE" +
           ");";
 
@@ -81,6 +92,7 @@ public class SqliteDb extends Database {
       s.executeUpdate(SQLiteCreateStatesTable);
       s.executeUpdate(SQLiteCreatePlayersTable);
       s.execute(SQLiteCreateChunksTable);
+      s.execute(SQLiteCreateChunkBuildTable);
       s.close();
     } catch (SQLException e) {
       e.printStackTrace();
@@ -108,6 +120,14 @@ public class SqliteDb extends Database {
     }
 
     try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM chunks LIMIT 1;")) {
+      try (ResultSet rs = ps.executeQuery()) {
+
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, "Unable to retreive connection for names", e);
+    }
+
+    try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM chunkbuilds LIMIT 1;")) {
       try (ResultSet rs = ps.executeQuery()) {
 
       }
