@@ -1,5 +1,6 @@
 package edu.brown.cs.ykim81.statecraft.cache;
 
+import edu.brown.cs.ykim81.statecraft.commands.Role;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 
@@ -11,12 +12,6 @@ import java.util.UUID;
  * Created by therl on 4/28/2017.
  */
 public class PermManager {
-
-  public enum Role {
-    BANDIT,
-    CITIZEN,
-    LEADER
-  }
 
   private static Map<UUID, Role> roles = new HashMap<>();
 

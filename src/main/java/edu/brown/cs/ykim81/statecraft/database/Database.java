@@ -348,34 +348,38 @@ public abstract class Database {
   }
 
   public List<ChunkProxy> getChunk(Map<String, Object> params) {
-    List<String> paramList = new ArrayList<>();
-    List<String> keys = new ArrayList<>(params.keySet());
-    for (String s : keys) {
-      paramList.add(s + "=?");
-    }
-    String param = StringUtils.join(paramList, " AND ");
-
-    try (Connection conn = getSqlConnection()) {
-      try (PreparedStatement ps = conn.prepareStatement("SELECT id, x, z, state, district FROM chunks WHERE " + param + ";")) {
-        for (int i = 0; i < keys.size(); i++) {
-          ps.setObject(i + 1, params.get(keys.get(i)));
-        }
-        try (ResultSet rs = ps.executeQuery()) {
-          List<ChunkProxy> chunks = new ArrayList<>();
-          while (rs.next()) {
-            int id = rs.getInt(1);
-            double x = rs.getDouble(2);
-            double z = rs.getDouble(3);
-            int state = rs.getInt(4);
-            String district = rs.getString(5);
-            chunks.add(new ChunkProxy(id, x, z, state, District.fromString(district)));
-          }
-          return chunks;
-        }
-      }
-    } catch (SQLException e) {
-      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+    if (!chunkExists(params)) {
       return new ArrayList<>();
+    } else {
+      List<String> paramList = new ArrayList<>();
+      List<String> keys = new ArrayList<>(params.keySet());
+      for (String s : keys) {
+        paramList.add(s + "=?");
+      }
+      String param = StringUtils.join(paramList, " AND ");
+
+      try (Connection conn = getSqlConnection()) {
+        try (PreparedStatement ps = conn.prepareStatement("SELECT id, x, z, state, district FROM chunks WHERE " + param + ";")) {
+          for (int i = 0; i < keys.size(); i++) {
+            ps.setObject(i + 1, params.get(keys.get(i)));
+          }
+          try (ResultSet rs = ps.executeQuery()) {
+            List<ChunkProxy> chunks = new ArrayList<>();
+            while (rs.next()) {
+              int id = rs.getInt(1);
+              double x = rs.getDouble(2);
+              double z = rs.getDouble(3);
+              int state = rs.getInt(4);
+              String district = rs.getString(5);
+              chunks.add(new ChunkProxy(id, x, z, state, District.fromString(district)));
+            }
+            return chunks;
+          }
+        }
+      } catch (SQLException e) {
+        plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+        return new ArrayList<>();
+      }
     }
   }
 
@@ -455,31 +459,35 @@ public abstract class Database {
   }
 
   public List<ChunkBuildProxy> getChunkBuild(Map<String, Object> params) {
-    List<String> paramList = new ArrayList<>();
-    List<String> keys = new ArrayList<>(params.keySet());
-    for (String s : keys) {
-      paramList.add(s + "=?");
-    }
-    String param = StringUtils.join(paramList, " AND ");
-
-    try (Connection conn = getSqlConnection()) {
-      try (PreparedStatement ps = conn.prepareStatement("SELECT userId, chunkId FROM chunkbuilds WHERE " + param + ";")) {
-        for (int i = 0; i < keys.size(); i++) {
-          ps.setObject(i + 1, params.get(keys.get(i)));
-        }
-        try (ResultSet rs = ps.executeQuery()) {
-          List<ChunkBuildProxy> chunks = new ArrayList<>();
-          while (rs.next()) {
-            String userId = rs.getString(1);
-            int chunkId = rs.getInt(2);
-            chunks.add(new ChunkBuildProxy(userId, chunkId));
-          }
-          return chunks;
-        }
-      }
-    } catch (SQLException e) {
-      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+    if (!chunkBuildExists(params)) {
       return new ArrayList<>();
+    } else {
+      List<String> paramList = new ArrayList<>();
+      List<String> keys = new ArrayList<>(params.keySet());
+      for (String s : keys) {
+        paramList.add(s + "=?");
+      }
+      String param = StringUtils.join(paramList, " AND ");
+
+      try (Connection conn = getSqlConnection()) {
+        try (PreparedStatement ps = conn.prepareStatement("SELECT userId, chunkId FROM chunkbuilds WHERE " + param + ";")) {
+          for (int i = 0; i < keys.size(); i++) {
+            ps.setObject(i + 1, params.get(keys.get(i)));
+          }
+          try (ResultSet rs = ps.executeQuery()) {
+            List<ChunkBuildProxy> chunks = new ArrayList<>();
+            while (rs.next()) {
+              String userId = rs.getString(1);
+              int chunkId = rs.getInt(2);
+              chunks.add(new ChunkBuildProxy(userId, chunkId));
+            }
+            return chunks;
+          }
+        }
+      } catch (SQLException e) {
+        plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+        return new ArrayList<>();
+      }
     }
   }
 

@@ -61,6 +61,8 @@ public class CommandCreate implements CommandExecutor {
       return electPlayer(sender, strings[1]);
     } else if (strings.length == 2 && strings[0].equals("impeach")) {
       return impeachPlayer(sender, strings[1]);
+    } else if (strings.length == 3 && strings[0].equals("builder")) {
+      return setBuilder(sender, strings[1], strings[2]);
     }
     return false;
   }
@@ -607,6 +609,82 @@ public class CommandCreate implements CommandExecutor {
 
     db.updatePlayer(playerToInvite.getUniqueId().toString(), ImmutableMap.<String, Object>of("leader", 0));
     sender.sendMessage("Impeached " + playerToInvite.getName() + " from leader.");
+    return true;
+  }
+
+  private boolean setBuilder(CommandSender sender, String name, String bool) {
+    if (!(sender instanceof Player)) {
+      sender.sendMessage("You must be a player!");
+      return false;
+    }
+    Player player = (Player) sender;
+
+    if (!playerIsLeader(player.getUniqueId().toString())) {
+      sender.sendMessage("ERROR: You must be a leader to do this.");
+      return true;
+    }
+
+    List<Player> playerList1 = getPlayer(name);
+    if (playerList1.size() == 0) {
+      sender.sendMessage("ERROR: There is no online player with that name.");
+      return true;
+    }
+
+    Player playerToInvite = playerList1.get(0);
+    List<PlayerProxy> pp = db.readPlayer(ImmutableMap.<String, Object>of("id", playerToInvite.getUniqueId().toString()));
+    if (pp.size() == 0) {
+      sender.sendMessage("ERROR: The player is not in your state.");
+      return true;
+    }
+
+    PlayerProxy selfProxy = db.readPlayer(ImmutableMap.<String, Object>of("id", player.getUniqueId().toString())).get(0);
+    if (selfProxy.getState() != pp.get(0).getState()) {
+      sender.sendMessage("ERROR: The player is not in your state.");
+      return true;
+    }
+
+    if (pp.get(0).getLeader() == 1) {
+      sender.sendMessage("ERROR: The player is a leader.");
+      return true;
+    }
+
+    Chunk chunk = player.getWorld().getChunkAt(player.getLocation());
+    List<ChunkProxy> chunkList = db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ()));
+    if (chunkList.size() == 0) {
+      sender.sendMessage("ERROR: This land is not claimed.");
+      return true;
+    }
+
+    if (chunkList.get(0).getStateId() != selfProxy.getState()) {
+      sender.sendMessage("ERROR: This is not your state land!");
+      return true;
+    }
+
+    List<ChunkBuildProxy> cbp = db.getChunkBuild(ImmutableMap.<String, Object>of("userId", playerToInvite.getUniqueId().toString(),
+            "chunkId", chunkList.get(0).getChunkId()));
+    if (bool.toLowerCase().equals("true")) {
+      if (cbp.size() > 0) {
+        sender.sendMessage("ERROR: That player is already a builder in this district.");
+        return true;
+      } else {
+        db.createChunkBuild(playerToInvite.getUniqueId().toString(), chunkList.get(0).getChunkId());
+        sender.sendMessage("Updated " + playerToInvite.getName() + " as builder of this district.");
+        return true;
+      }
+    }
+
+    if (bool.toLowerCase().equals("false")) {
+      if (cbp.size() == 0) {
+        sender.sendMessage("ERROR: That player is not a builder in this district.");
+        return true;
+      } else {
+        db.deleteChunkBuild(playerToInvite.getUniqueId().toString(), chunkList.get(0).getChunkId());
+        sender.sendMessage("Removed " + playerToInvite + " from builder of this district.");
+        return true;
+      }
+    }
+
+    sender.sendMessage("ERROR: Third argument must be true/false.");
     return true;
   }
 
