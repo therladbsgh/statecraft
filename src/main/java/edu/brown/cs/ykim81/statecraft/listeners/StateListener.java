@@ -1,10 +1,7 @@
 package edu.brown.cs.ykim81.statecraft.listeners;
 
 import com.google.common.collect.ImmutableMap;
-import edu.brown.cs.ykim81.statecraft.database.ChunkProxy;
-import edu.brown.cs.ykim81.statecraft.database.Database;
-import edu.brown.cs.ykim81.statecraft.database.District;
-import edu.brown.cs.ykim81.statecraft.database.StateProxy;
+import edu.brown.cs.ykim81.statecraft.database.*;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -71,10 +68,11 @@ public class StateListener implements Listener {
         if (currentState != prevState) {
           event.getPlayer().sendMessage("~~~Wilderness~~~");
         }
-        updateScoreboardState(event.getPlayer(), "Wilderness", "None");
+        updateScoreboardState(event.getPlayer(), "Wilderness", "--", "--");
       } else {
         StateProxy stateProxy = db.readState(ImmutableMap.<String, Object>of("id", currentState)).get(0);
-        updateScoreboardState(event.getPlayer(), stateProxy.getName(), chunk.getDistrict().toString());
+        CityProxy cityProxy = db.getCity(ImmutableMap.<String, Object>of("id", chunk.getCityId())).get(0);
+        updateScoreboardState(event.getPlayer(), stateProxy.getName(), cityProxy.getName(), chunk.getDistrict().toString());
         if (currentState != prevState) {
           event.getPlayer().sendMessage("[" + stateProxy.getName() + "]");
         }
@@ -87,44 +85,44 @@ public class StateListener implements Listener {
     Objective obj = board.registerNewObjective("StateCraft", "dummy");
     obj.setDisplaySlot(DisplaySlot.SIDEBAR);
     obj.setDisplayName("Statecraft");
-    Score onlineName = obj.getScore(ChatColor.GRAY + "» Online");
-    onlineName.setScore(15);
-
-    Team onlineCounter = board.registerNewTeam("onlineCounter");
-    onlineCounter.addEntry(ChatColor.BLACK + "" + ChatColor.WHITE + "");
-    if(Bukkit.getOnlinePlayers().size() == 0){
-      onlineCounter.setPrefix(ChatColor.DARK_RED + "" + "0" + ChatColor.RED + "/" + "" + ChatColor.DARK_RED + Bukkit.getServer().getMaxPlayers());
-    }else{
-      onlineCounter.setPrefix(String.valueOf(ChatColor.DARK_RED + "" + Bukkit.getOnlinePlayers().size() + "" + ChatColor.RED + "/" + "" + ChatColor.DARK_RED + "" + Bukkit.getServer().getMaxPlayers()));
-    }
-    obj.getScore(ChatColor.BLACK + "" + ChatColor.WHITE + "").setScore(14);
 
     Score money = obj.getScore(ChatColor.GRAY + "» Money");
-    money.setScore(13);
+    money.setScore(15);
 
     Team moneyCounter = board.registerNewTeam("moneyCounter");
     moneyCounter.addEntry(ChatColor.RED + "" + ChatColor.WHITE + "");
     moneyCounter.setPrefix(ChatColor.GREEN + "$" + economy.getBalance(player));
-    obj.getScore(ChatColor.RED + "" + ChatColor.WHITE + "").setScore(12);
+    obj.getScore(ChatColor.RED + "" + ChatColor.WHITE + "").setScore(14);
 
     Score state = obj.getScore(ChatColor.GRAY + "» State");
-    state.setScore(11);
+    state.setScore(13);
 
     ChunkProxy chunk = getCurrentChunk(player);
     String stateName;
+    String cityName;
     String districtName;
     if (chunk.getStateId() == -1) {
       stateName = "Wilderness";
-      districtName = "None";
+      cityName = "--";
+      districtName = "--";
     } else {
       stateName = db.readState(ImmutableMap.<String, Object>of("id", chunk.getStateId())).get(0).getName();
+      cityName = db.getCity(ImmutableMap.<String, Object>of("id", chunk.getCityId())).get(0).getName();
       districtName = chunk.getDistrict().toString();
     }
 
     Team stateCounter = board.registerNewTeam("stateCounter");
     stateCounter.addEntry(ChatColor.YELLOW + "" + ChatColor.WHITE + "");
     stateCounter.setPrefix(ChatColor.GREEN + stateName);
-    obj.getScore(ChatColor.YELLOW + "" + ChatColor.WHITE + "").setScore(10);
+    obj.getScore(ChatColor.YELLOW + "" + ChatColor.WHITE + "").setScore(12);
+
+    Score city = obj.getScore(ChatColor.GRAY + "» City");
+    city.setScore(11);
+
+    Team cityCounter = board.registerNewTeam("cityCounter");
+    cityCounter.addEntry(ChatColor.BLACK + "" + ChatColor.WHITE  + "");
+    cityCounter.setPrefix(ChatColor.GREEN + cityName);
+    obj.getScore(ChatColor.BLACK + "" + ChatColor.WHITE + "").setScore(10);
 
     Score district = obj.getScore(ChatColor.GRAY + "» District");
     district.setScore(9);
@@ -136,9 +134,10 @@ public class StateListener implements Listener {
     player.setScoreboard(board);
   }
 
-  private void updateScoreboardState(Player player, String stateName, String districtName) {
+  private void updateScoreboardState(Player player, String stateName, String cityName, String districtName) {
     Scoreboard board = player.getScoreboard();
     board.getTeam("stateCounter").setPrefix(ChatColor.GREEN + stateName);
+    board.getTeam("cityCounter").setPrefix(ChatColor.GREEN + cityName);
     board.getTeam("districtCounter").setPrefix(ChatColor.GREEN + districtName);
   }
 

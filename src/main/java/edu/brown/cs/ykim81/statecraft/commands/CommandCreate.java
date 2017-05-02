@@ -254,17 +254,18 @@ public class CommandCreate implements CommandExecutor {
     }
 
     int stateId = db.readPlayer(ImmutableMap.<String, Object>of("id", player.getUniqueId().toString())).get(0).getState();
-    int playersInState = db.countPlayer(ImmutableMap.<String, Object>of("state", stateId));
+    int leadersInState = db.countPlayer(ImmutableMap.<String, Object>of("state", stateId, "leader", 1));
+    int citizensInState = db.countPlayer(ImmutableMap.<String, Object>of("state", stateId, "leader", 0));
 
-    if (playerIsLeader(player.getUniqueId().toString()) && playersInState > 1) {
-      sender.sendMessage("ERROR: You cannot leave if you are a leader and other people are in the state.");
+    if (leadersInState == 1 && citizensInState > 0) {
+      sender.sendMessage("ERROR: You cannot leave if you are the last leader and other people are in the state.");
       return true;
     }
 
     db.deletePlayer(player.getUniqueId().toString());
     PermManager.makeBandit(player);
     sender.sendMessage("You have abandoned your citizenship.");
-    if (playersInState == 1) {
+    if (leadersInState + citizensInState == 1) {
       removeState(stateId);
       sender.sendMessage("As you were the last person, the state is now removed from existence.");
     }
