@@ -24,12 +24,14 @@ public class StateListener implements Listener {
 
   private Database db;
   private Map<UUID, Integer> playerToState;
+  private Map<UUID, Integer> playerToCity;
   private Map<UUID, District> playerToDistrict;
   private Economy economy;
 
   public StateListener(Database db, Economy economy) {
     this.db = db;
     this.playerToState = new HashMap<>();
+    this.playerToCity = new HashMap<>();
     this.playerToDistrict = new HashMap<>();
     this.economy = economy;
   }
@@ -39,6 +41,7 @@ public class StateListener implements Listener {
     System.out.println("Joined");
     ChunkProxy chunk = getCurrentChunk(event.getPlayer());
     playerToState.put(event.getPlayer().getUniqueId(), chunk.getStateId());
+    playerToCity.put(event.getPlayer().getUniqueId(), chunk.getCityId());
     playerToDistrict.put(event.getPlayer().getUniqueId(), chunk.getDistrict());
     setScoreboard(event.getPlayer());
   }
@@ -56,13 +59,17 @@ public class StateListener implements Listener {
   public void onPlayerMove(PlayerMoveEvent event) {
     ChunkProxy chunk = getCurrentChunk(event.getPlayer());
     int currentState = chunk.getStateId();
+    int currentCity = chunk.getCityId();
     District currentDistrict = chunk.getDistrict();
     int prevState = playerToState.get(event.getPlayer().getUniqueId()).intValue();
+    int prevCity = playerToCity.get(event.getPlayer().getUniqueId()).intValue();
     District prevDistrict = playerToDistrict.get(event.getPlayer().getUniqueId());
 
     if (currentState != prevState
-            || currentDistrict != prevDistrict) {
+            || currentDistrict != prevDistrict
+            || currentCity != prevCity) {
       playerToState.put(event.getPlayer().getUniqueId(), currentState);
+      playerToCity.put(event.getPlayer().getUniqueId(), currentCity);
       playerToDistrict.put(event.getPlayer().getUniqueId(), currentDistrict);
       if (currentState == -1) {
         if (currentState != prevState) {

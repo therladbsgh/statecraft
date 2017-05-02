@@ -69,6 +69,8 @@ public class CommandCreate implements CommandExecutor {
       return impeachPlayer(sender, strings[1]);
     } else if (strings.length == 3 && strings[0].equals("builder")) {
       return setBuilder(sender, strings[1], strings[2]);
+    } else if (strings.length == 2 && strings[0].equals("rename")) {
+      return renameCity(sender, strings[1]);
     }
     return false;
   }
@@ -423,6 +425,46 @@ public class CommandCreate implements CommandExecutor {
 
     invitedPlayers.remove(player.getUniqueId().toString());
     sender.sendMessage("You have rejected the offer.");
+    return true;
+  }
+
+  private boolean renameCity(CommandSender sender, String name) {
+    if (!(sender instanceof Player)) {
+      sender.sendMessage("You must be a player!");
+      return false;
+    }
+    Player player = (Player) sender;
+
+    if (!playerIsLeader(player.getUniqueId().toString())) {
+      sender.sendMessage("ERROR: You must be a leader to do this.");
+      return true;
+    }
+
+    List<PlayerProxy> playerList = db.readPlayer(ImmutableMap.<String, Object>of("id", player.getUniqueId().toString()));
+    if (playerList.size() == 0) {
+      sender.sendMessage("ERROR: You are not in a state!");
+      return true;
+    }
+
+    Chunk chunk = player.getWorld().getChunkAt(player.getLocation());
+    List<ChunkProxy> chunkList = db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ()));
+    if (chunkList.size() == 0) {
+      sender.sendMessage("ERROR: This land is not claimed.");
+      return true;
+    }
+
+    if (chunkList.get(0).getStateId() != playerList.get(0).getState()) {
+      sender.sendMessage("ERROR: This is not your state land!");
+      return true;
+    }
+
+    if (chunkList.get(0).getDistrict() != District.CITYCENTER) {
+      sender.sendMessage("ERROR: You can only rename while on the city center.");
+      return true;
+    }
+
+    db.updateCity(chunkList.get(0).getCityId(), ImmutableMap.<String, Object>of("name", name));
+    sender.sendMessage("Renamed city to " + name + ".");
     return true;
   }
 
