@@ -306,13 +306,14 @@ public abstract class Database {
     }
   }
 
-  public void createChunk(double x, double z, int state, District district) {
+  public void createChunk(double x, double z, int state, int city, District district) {
     try (Connection conn = getSqlConnection()) {
-      try (PreparedStatement ps = conn.prepareStatement("INSERT INTO chunks(x, z, state, district) VALUES(?,?,?,?)")) {
+      try (PreparedStatement ps = conn.prepareStatement("INSERT INTO chunks(x, z, state, city, district) VALUES(?,?,?,?,?)")) {
         ps.setDouble(1, x);
         ps.setDouble(2, z);
         ps.setInt(3, state);
-        ps.setString(4, district.toString());
+        ps.setInt(4, city);
+        ps.setString(5, district.toString());
         ps.executeUpdate();
       }
     } catch (SQLException e) {
@@ -359,7 +360,7 @@ public abstract class Database {
       String param = StringUtils.join(paramList, " AND ");
 
       try (Connection conn = getSqlConnection()) {
-        try (PreparedStatement ps = conn.prepareStatement("SELECT id, x, z, state, district FROM chunks WHERE " + param + ";")) {
+        try (PreparedStatement ps = conn.prepareStatement("SELECT id, x, z, state, city, district FROM chunks WHERE " + param + ";")) {
           for (int i = 0; i < keys.size(); i++) {
             ps.setObject(i + 1, params.get(keys.get(i)));
           }
@@ -370,8 +371,9 @@ public abstract class Database {
               double x = rs.getDouble(2);
               double z = rs.getDouble(3);
               int state = rs.getInt(4);
-              String district = rs.getString(5);
-              chunks.add(new ChunkProxy(id, x, z, state, District.fromString(district)));
+              int city = rs.getInt(5);
+              String district = rs.getString(6);
+              chunks.add(new ChunkProxy(id, x, z, state, city, District.fromString(district)));
             }
             return chunks;
           }
@@ -496,6 +498,111 @@ public abstract class Database {
       try (PreparedStatement ps = conn.prepareStatement("DELETE FROM chunkbuilds WHERE userId=? AND chunkId=?;")) {
         ps.setString(1, userId);
         ps.setInt(2, chunkId);
+        ps.executeUpdate();
+        return;
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+    }
+  }
+
+  public CityProxy createCity(String name, int stateId) {
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("INSERT INTO cities(name, state) VALUES(?,?)")) {
+        ps.setString(1, name);
+        ps.setInt(2, stateId);
+        ps.executeUpdate();
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+      return null;
+    }
+    return getCity(ImmutableMap.<String, Object>of("name", name, "state", stateId)).get(0);
+  }
+
+  public boolean cityExists(Map<String, Object> params) {
+    List<String> paramList = new ArrayList<>();
+    List<String> keys = new ArrayList<>(params.keySet());
+    for (String s : keys) {
+      paramList.add(s + "=?");
+    }
+    String param = StringUtils.join(paramList, " AND ");
+
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM cities WHERE " + param + " LIMIT 1;")) {
+        for (int i = 0; i < keys.size(); i++) {
+          ps.setObject(i + 1, params.get(keys.get(i)));
+        }
+        try (ResultSet rs = ps.executeQuery()) {
+          if (rs.next()) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+      return false;
+    }
+  }
+
+  public List<CityProxy> getCity(Map<String, Object> params) {
+    List<String> paramList = new ArrayList<>();
+    List<String> keys = new ArrayList<>(params.keySet());
+    for (String s : keys) {
+      paramList.add(s + "=?");
+    }
+    String param = StringUtils.join(paramList, " AND ");
+
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("SELECT id, name, state FROM cities WHERE " + param + ";")) {
+        for (int i = 0; i < keys.size(); i++) {
+          ps.setObject(i + 1, params.get(keys.get(i)));
+        }
+        try (ResultSet rs = ps.executeQuery()) {
+          List<CityProxy> cities = new ArrayList<>();
+          while (rs.next()) {
+            int id = rs.getInt(1);
+            String name = rs.getString(2);
+            int state = rs.getInt(3);
+            cities.add(new CityProxy(id, name, state));
+          }
+          return cities;
+        }
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+      return new ArrayList<>();
+    }
+  }
+
+  public void updateCity(int id, Map<String, Object> params) {
+    List<String> paramList = new ArrayList<>();
+    List<String> keys = new ArrayList<>(params.keySet());
+    for (String s : keys) {
+      paramList.add(s + "=?");
+    }
+    String param = StringUtils.join(paramList, " AND ");
+
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("UPDATE cities SET " + param + " WHERE id = ?;")) {
+        for (int i = 0; i < keys.size(); i++) {
+          ps.setObject(i + 1, params.get(keys.get(i)));
+        }
+        ps.setInt(keys.size() + 1, id);
+        ps.executeUpdate();
+        return;
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+    }
+  }
+
+  public void deleteCity(int id) {
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("DELETE FROM cities WHERE id = ?;")) {
+        ps.setInt(1, id);
         ps.executeUpdate();
         return;
       }

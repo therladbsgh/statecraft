@@ -31,8 +31,14 @@ public class CommandCreate implements CommandExecutor {
   }
 
   public boolean onCommand(CommandSender sender, Command command, String s, String[] strings) {
-    if (strings.length == 2 && strings[0].equals("create")) {
-      return createState(sender, strings[1]);
+    if (strings.length == 3 && strings[0].equals("create")) {
+      if (strings[1].toLowerCase().equals("state")) {
+        return createState(sender, strings[2]);
+      } else if (strings[1].toLowerCase().equals("city")) {
+        return createCity(sender, strings[2]);
+      } else {
+        sender.sendMessage("ERROR: 2nd argument must be [state/city].");
+      }
     } else if (strings.length == 2 && strings[0].equals("tax")) {
       return setTax(sender, strings[1]);
     } else if (strings.length == 1 && strings[0].equals("leave")) {
@@ -156,12 +162,51 @@ public class CommandCreate implements CommandExecutor {
 
     StateProxy state = db.createState(name);
     db.createPlayer(player.getUniqueId().toString(), state.getId(), 1);
-    claimChunk(sender, District.CITYCENTER);
     PermManager.makeLeader(player);
+    createCity(sender, name);
+    sender.sendMessage("State " + name + " created.");
+    return true;
+  }
+
+  private boolean createCity(CommandSender sender, String name) {
+    if (!(sender instanceof Player)) {
+      sender.sendMessage("You must be a player!");
+      return false;
+    }
+    Player player = (Player) sender;
+
+    if (name.length() == 0) {
+      player.sendMessage("ERROR: City name must not be empty.");
+      return true;
+    }
+
+    if (!playerIsLeader(player.getUniqueId().toString())) {
+      sender.sendMessage("ERROR: You must be a leader of a state!");
+      return true;
+    }
+
+    int stateId = db.readPlayer(ImmutableMap.<String, Object>of("id", player.getUniqueId().toString())).get(0).getState();
+
+    if (db.cityExists(ImmutableMap.<String, Object>of("name", name, "state", stateId))) {
+      sender.sendMessage("ERROR: City name already exists.");
+      return true;
+    }
+
+    Chunk chunk = player.getWorld().getChunkAt(player.getLocation());
+    List<ChunkProxy> chunkList = db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ()));
+    if (chunkList.size() > 0) {
+      sender.sendMessage("ERROR: You cannot start a state on claimed land.");
+      return true;
+    }
+
+    CityProxy cityProxy = db.createCity(name, stateId);
+    claimChunk(sender, District.CITYCENTER);
+    ChunkProxy cp = db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ())).get(0);
+    db.updateChunk(chunk.getX(), chunk.getZ(), ImmutableMap.<String, Object>of("city", cityProxy.getId()));
     player.teleport(new Location(player.getWorld(), (chunk.getX() * 16) + 8.0,
             player.getLocation().getY(), (chunk.getZ() * 16) + 8.0));
     pasteSchematic("CityCenter", player, player.getLocation().getX(), player.getLocation().getY(), player.getLocation().getZ());
-    sender.sendMessage("State " + name + " created.");
+    sender.sendMessage("City " + name + " created.");
     return true;
   }
 
@@ -235,6 +280,10 @@ public class CommandCreate implements CommandExecutor {
         db.deleteChunkBuild(cbp.getUserId(), cbp.getChunkId());
       }
       db.deleteChunk(c.getX(), c.getZ());
+    }
+    List<CityProxy> cities = db.getCity(ImmutableMap.<String, Object>of("state", stateId));
+    for (CityProxy c : cities) {
+      db.deleteCity(c.getId());
     }
   }
 
@@ -412,7 +461,29 @@ public class CommandCreate implements CommandExecutor {
       return true;
     }
 
-    db.createChunk(chunk.getX(), chunk.getZ(), playerList.get(0).getState(), district);
+    List<ChunkProxy> near = new ArrayList<>();
+    near.addAll(db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX() + 1, "z", chunk.getZ())));
+    near.addAll(db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX() - 1, "z", chunk.getZ())));
+    near.addAll(db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ() + 1)));
+    near.addAll(db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ() - 1)));
+
+    if (near.size() == 0 && district != District.CITYCENTER) {
+      sender.sendMessage("ERROR: You can only claim land adjacent to your state's claimed land.");
+      return true;
+    }
+
+    int cityId = -1;
+    for (ChunkProxy cp : near) {
+      if (cp.getStateId() == playerList.get(0).getState()) {
+        cityId = cp.getCityId();
+      }
+    }
+    if (cityId == -1 && district != District.CITYCENTER) {
+      sender.sendMessage("ERROR: You can only claim land adjacent to your state's claimed land.");
+      return true;
+    }
+
+    db.createChunk(chunk.getX(), chunk.getZ(), playerList.get(0).getState(), cityId, district);
     sender.sendMessage("You have claimed the land.");
     return true;
   }

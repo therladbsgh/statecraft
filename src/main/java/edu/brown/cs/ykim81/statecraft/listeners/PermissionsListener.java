@@ -98,9 +98,53 @@ public class PermissionsListener implements Listener {
   @EventHandler
   public void onPlayerPlaceEvent(BlockPlaceEvent event) {
     Player player = event.getPlayer();
+    Block block = event.getBlock();
     if (PermManager.isBandit(player)) {
       event.setCancelled(true);
       player.sendMessage("You cannot place blocks as a bandit.");
+    }
+
+    if (PermManager.isLeader(player)) {
+      Chunk chunk = player.getWorld().getChunkAt(block.getLocation());
+      PlayerProxy pp = db.readPlayer(ImmutableMap.<String, Object>of("id", player.getUniqueId().toString())).get(0);
+      List<ChunkProxy> chunks = db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ()));
+
+      if (chunks.size() == 0) {
+        event.setCancelled(true);
+        player.sendMessage("You cannot place blocks in the wilderness.");
+        return;
+      }
+
+      if (chunks.get(0).getStateId() != pp.getState()) {
+        event.setCancelled(true);
+        player.sendMessage("You cannot place blocks in another state.");
+        return;
+      }
+    }
+
+    if (PermManager.isCitizen(player)) {
+      Chunk chunk = player.getWorld().getChunkAt(block.getLocation());
+      PlayerProxy pp = db.readPlayer(ImmutableMap.<String, Object>of("id", player.getUniqueId().toString())).get(0);
+      List<ChunkProxy> chunks = db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ()));
+
+      if (chunks.size() == 0) {
+        event.setCancelled(true);
+        player.sendMessage("You cannot place blocks in the wilderness.");
+        return;
+      }
+
+      if (chunks.get(0).getStateId() != pp.getState()) {
+        event.setCancelled(true);
+        player.sendMessage("You cannot place blocks in another state.");
+        return;
+      }
+
+      List<ChunkBuildProxy> cbp = db.getChunkBuild(ImmutableMap.<String, Object>of("userId", player.getUniqueId().toString(),
+              "chunkId", chunks.get(0).getChunkId()));
+      if (cbp.size() == 0 && chunks.get(0).getDistrict() != District.PRIMARY) {
+        event.setCancelled(true);
+        player.sendMessage("You cannot place blocks in this district.");
+      }
     }
   }
 

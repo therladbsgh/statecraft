@@ -51,7 +51,7 @@ public class StateListener implements Listener {
     if (db.chunkExists(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ()))) {
       return db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX(), "z", chunk.getZ())).get(0);
     } else {
-      return new ChunkProxy(-1, chunk.getX(), chunk.getZ(), -1, District.NULL);
+      return new ChunkProxy(-1, chunk.getX(), chunk.getZ(), -1, -1, District.NULL);
     }
   }
 

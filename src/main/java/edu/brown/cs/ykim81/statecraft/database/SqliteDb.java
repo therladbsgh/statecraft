@@ -36,14 +36,26 @@ public class SqliteDb extends Database {
           "ON DELETE CASCADE ON UPDATE CASCADE" +
           ");";
 
+  public String SQLiteCreateCitiesTable = "CREATE TABLE IF NOT EXISTS cities (" +
+          "`id` INTEGER NOT NULL," +
+          "`name` TEXT NOT NULL," +
+          "`state` INTEGER NOT NULL," +
+          "PRIMARY KEY (`id`)" +
+          "FOREIGN KEY (`state`) REFERENCES state(id)" +
+          "ON DELETE CASCADE ON UPDATE CASCADE" +
+          ");";
+
   public String SQLiteCreateChunksTable = "CREATE TABLE IF NOT EXISTS chunks (" +
           "`id` INTEGER NOT NULL," +
           "`x` REAL NOT NULL," +
           "`z` REAL NOT NULL," +
           "`state` INTEGER NOT NULL," +
+          "`city` INTEGER NOT NULL," +
           "`district` TEXT NOT NULL," +
           "PRIMARY KEY (`id`)" +
           "FOREIGN KEY (`state`) REFERENCES state(id)" +
+          "ON DELETE CASCADE ON UPDATE CASCADE," +
+          "FOREIGN KEY (`city`) REFERENCES cities(id)" +
           "ON DELETE CASCADE ON UPDATE CASCADE" +
           ");";
 
@@ -93,6 +105,7 @@ public class SqliteDb extends Database {
       s.executeUpdate(SQLiteCreatePlayersTable);
       s.execute(SQLiteCreateChunksTable);
       s.execute(SQLiteCreateChunkBuildTable);
+      s.execute(SQLiteCreateCitiesTable);
       s.close();
     } catch (SQLException e) {
       e.printStackTrace();
@@ -132,7 +145,15 @@ public class SqliteDb extends Database {
 
       }
     } catch (SQLException e) {
-      plugin.getLogger().log(Level.SEVERE, "Unable to retreive connection for names", e);
+      plugin.getLogger().log(Level.SEVERE, "Unable to retreive connection for chunkbuilds", e);
+    }
+
+    try (PreparedStatement ps = connection.prepareStatement("SELECT * FROM cities LIMIT 1;")) {
+      try (ResultSet rs = ps.executeQuery()) {
+
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, "Unable to retreive connection for cities", e);
     }
   }
 }
