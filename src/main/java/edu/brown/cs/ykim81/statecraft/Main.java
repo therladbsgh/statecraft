@@ -50,7 +50,7 @@ public class Main extends JavaPlugin {
     getServer().getPluginManager().registerEvents(new StateListener(db, econ), this);
     getServer().getPluginManager().registerEvents(new PermissionsListener(db), this);
 
-    this.getCommand("sc").setExecutor(new CommandCreate(db));
+    this.getCommand("sc").setExecutor(new CommandCreate(db, econ));
     getLogger().info("StateCraft Enabled.");
   }
 

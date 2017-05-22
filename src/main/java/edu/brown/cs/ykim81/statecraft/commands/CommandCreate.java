@@ -6,6 +6,8 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
 import edu.brown.cs.ykim81.statecraft.cache.PermManager;
 import edu.brown.cs.ykim81.statecraft.database.*;
+import edu.brown.cs.ykim81.statecraft.listeners.ScoreboardManager;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -23,10 +25,12 @@ import java.util.*;
 public class CommandCreate implements CommandExecutor {
 
   private Database db;
+  private Economy econ;
   private Map<String, Integer> invitedPlayers;
 
-  public CommandCreate(Database db) {
+  public CommandCreate(Database db, Economy econ) {
     this.db = db;
+    this.econ = econ;
     this.invitedPlayers = new HashMap<>();
   }
 
@@ -71,6 +75,8 @@ public class CommandCreate implements CommandExecutor {
       return setBuilder(sender, strings[1], strings[2]);
     } else if (strings.length == 2 && strings[0].equals("rename")) {
       return renameCity(sender, strings[1]);
+    } else if (strings.length == 1 && strings[0].equals("minimap")) {
+      return toggleMiniMap(sender);
     }
     return false;
   }
@@ -799,6 +805,25 @@ public class CommandCreate implements CommandExecutor {
     }
 
     sender.sendMessage("ERROR: Third argument must be true/false.");
+    return true;
+  }
+
+  private boolean toggleMiniMap(CommandSender sender) {
+    if (!(sender instanceof Player)) {
+      sender.sendMessage("You must be a player!");
+      return false;
+    }
+    Player player = (Player) sender;
+
+    boolean miniMap = ScoreboardManager.isMiniMapMode(player.getUniqueId());
+    if (miniMap) {
+      ScoreboardManager.updateMiniMapMode(player.getUniqueId(), false);
+      ScoreboardManager.setMainScoreboard(player, db, econ);
+    } else {
+      ScoreboardManager.updateMiniMapMode(player.getUniqueId(), true);
+      ScoreboardManager.setMiniMapScoreboard(player, db);
+    }
+    player.sendMessage("Toggled the minimap.");
     return true;
   }
 
