@@ -109,22 +109,24 @@ public class ScoreboardManager {
     obj.setDisplayName("Statecraft");
 
     ChunkProxy chunk = getCurrentChunk(player, db);
+    List<ChunkProxy> chunks = db.getChunkRadius(chunk.getX(), chunk.getZ(), 5);
+    String[][] chunkStr = new String[11][11];
+    for (int i = 0; i < 11; i++) {
+      for (int j = 0; j < 11; j++) {
+        chunkStr[i][j] = "-";
+      }
+    }
+    for (ChunkProxy cp : chunks) {
+      int x = (int) (cp.getX() - chunk.getX() + 5);
+      int z = (int) (cp.getZ() - chunk.getZ() + 5);
+      chunkStr[z][x] = db.readState(ImmutableMap.<String, Object>of("id", cp.getStateId())).get(0).getName().substring(0, 1);
+    }
+    chunkStr[5][5] = "@";
 
     for (int i = 0; i < 11; i++) {
       String row = "";
       for (int j = 0; j < 11; j++) {
-        if (i == 5 && j == 5) {
-          row = row + "@";
-        } else {
-          List<ChunkProxy> cp = db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX() - 5 + i,
-                  "z", chunk.getZ() - 5 + j));
-          if (cp.size() == 0) {
-            row = row + "-";
-          } else {
-            StateProxy sp = db.readState(ImmutableMap.<String, Object>of("id", cp.get(0).getStateId())).get(0);
-            row = row + sp.getName().substring(0, 1);
-          }
-        }
+        row = row + chunkStr[i][j];
       }
       Team counter = board.registerNewTeam("" + i);
       counter.addEntry(getChatColor(i) + "" + ChatColor.WHITE + "");
@@ -137,21 +139,24 @@ public class ScoreboardManager {
   public static void updateMiniMapScoreboard(Player player, Database db) {
     Scoreboard board = player.getScoreboard();
     ChunkProxy chunk = getCurrentChunk(player, db);
+    List<ChunkProxy> chunks = db.getChunkRadius(chunk.getX(), chunk.getZ(), 5);
+    String[][] chunkStr = new String[11][11];
+    for (int i = 0; i < 11; i++) {
+      for (int j = 0; j < 11; j++) {
+        chunkStr[i][j] = "-";
+      }
+    }
+    for (ChunkProxy cp : chunks) {
+      int x = (int) (cp.getX() - chunk.getX() + 5);
+      int z = (int) (cp.getZ() - chunk.getZ() + 5);
+      chunkStr[z][x] = db.readState(ImmutableMap.<String, Object>of("id", cp.getStateId())).get(0).getName().substring(0, 1);
+    }
+    chunkStr[5][5] = "@";
+
     for (int i = 0; i < 11; i++) {
       String row = "";
       for (int j = 0; j < 11; j++) {
-        if (i == 5 && j == 5) {
-          row = row + "@";
-        } else {
-          List<ChunkProxy> cp = db.getChunk(ImmutableMap.<String, Object>of("x", chunk.getX() - 5 + i,
-                  "z", chunk.getZ() - 5 + j));
-          if (cp.size() == 0) {
-            row = row + "-";
-          } else {
-            StateProxy sp = db.readState(ImmutableMap.<String, Object>of("id", cp.get(0).getStateId())).get(0);
-            row = row + sp.getName().substring(0, 1);
-          }
-        }
+        row = row + chunkStr[i][j];
       }
       board.getTeam("" + i).setPrefix(row);
     }

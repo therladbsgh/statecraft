@@ -67,9 +67,11 @@ public class StateListener implements Listener {
       ChunkProxy prevChunk = playerToChunk.get(event.getPlayer().getUniqueId());
 
       if (!chunk.equals(prevChunk)) {
+        playerToChunk.put(event.getPlayer().getUniqueId(), chunk);
         ScoreboardManager.updateMiniMapScoreboard(event.getPlayer(), db);
       }
-    } else {
+    }
+
       int currentState = chunk.getStateId();
       int currentCity = chunk.getCityId();
       District currentDistrict = chunk.getDistrict();
@@ -87,16 +89,20 @@ public class StateListener implements Listener {
           if (currentState != prevState) {
             event.getPlayer().sendMessage("~~~Wilderness~~~");
           }
-          ScoreboardManager.updateMainScoreboard(event.getPlayer(), "Wilderness", "--", "--");
+          if (!ScoreboardManager.isMiniMapMode(event.getPlayer().getUniqueId())) {
+            ScoreboardManager.updateMainScoreboard(event.getPlayer(), "Wilderness", "--", "--");
+          }
         } else {
-          StateProxy stateProxy = db.readState(ImmutableMap.<String, Object>of("id", currentState)).get(0);
-          CityProxy cityProxy = db.getCity(ImmutableMap.<String, Object>of("id", chunk.getCityId())).get(0);
-          ScoreboardManager.updateMainScoreboard(event.getPlayer(), stateProxy.getName(), cityProxy.getName(), chunk.getDistrict().toString());
+            StateProxy stateProxy = db.readState(ImmutableMap.<String, Object>of("id", currentState)).get(0);
+          if (!ScoreboardManager.isMiniMapMode(event.getPlayer().getUniqueId())) {
+            CityProxy cityProxy = db.getCity(ImmutableMap.<String, Object>of("id", chunk.getCityId())).get(0);
+            ScoreboardManager.updateMainScoreboard(event.getPlayer(), stateProxy.getName(), cityProxy.getName(), chunk.getDistrict().toString());
+          }
           if (currentState != prevState) {
             event.getPlayer().sendMessage("[" + stateProxy.getName() + "]");
           }
         }
-      }
+
     }
   }
 

@@ -421,6 +421,40 @@ public abstract class Database {
     }
   }
 
+  /**
+   * Note: This actually gets a rxr square, not an actual circle.
+   *
+   * @param x
+   * @param z
+   * @param r
+   */
+  public List<ChunkProxy> getChunkRadius(double x, double z, int r) {
+    try (Connection conn = getSqlConnection()) {
+      try (PreparedStatement ps = conn.prepareStatement("SELECT id, x, z, state, city, district FROM chunks WHERE (x BETWEEN ? AND ?) AND (z BETWEEN ? AND ?)")) {
+        ps.setDouble(1, x - r);
+        ps.setDouble(2, x + r);
+        ps.setDouble(3, z - r);
+        ps.setDouble(4, z + r);
+        try (ResultSet rs = ps.executeQuery()) {
+          List<ChunkProxy> chunks = new ArrayList<>();
+          while (rs.next()) {
+            int id = rs.getInt(1);
+            double xR = rs.getDouble(2);
+            double zR = rs.getDouble(3);
+            int state = rs.getInt(4);
+            int city = rs.getInt(5);
+            String district = rs.getString(6);
+            chunks.add(new ChunkProxy(id, xR, zR, state, city, District.fromString(district)));
+          }
+          return chunks;
+        }
+      }
+    } catch (SQLException e) {
+      plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), e);
+      return new ArrayList<>();
+    }
+  }
+
   public void createChunkBuild(String userId, int chunkId) {
     try (Connection conn = getSqlConnection()) {
       try (PreparedStatement ps = conn.prepareStatement("INSERT INTO chunkbuilds(userId, chunkId) VALUES(?,?)")) {
